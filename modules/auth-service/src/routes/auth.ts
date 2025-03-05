@@ -1,9 +1,22 @@
 import { Router } from "express";
-import passport, { use } from "passport";
+import passport from "passport";
 import { Strategy as GithubStrategy } from "passport-github2";
 import jwt from "jsonwebtoken";
+import { Octokit } from "octokit";
+import { createClient } from "redis";
 
 export const authRouter = Router();
+
+let redisClient: any;
+
+createClient({
+  url: process.env.REDIS_URL,
+})
+  .on("error", (err) => console.error("[REDIS ERROR]", err))
+  .connect()
+  .then((client) => {
+    redisClient = client;
+  });
 
 passport.use(
   new GithubStrategy(
@@ -32,7 +45,7 @@ passport.deserializeUser((obj, done) => {
 
 authRouter.get(
   "/github",
-  passport.authenticate("github", { scope: ["user:email"] })
+  passport.authenticate("github", { scope: ["user:email", "repo", "workflow"] })
 );
 authRouter.get(
   "/github/callback",
@@ -54,16 +67,40 @@ authRouter.get(
   }
 );
 
-authRouter.get("/", (req, res) => {
+authRouter.get("/", async (req, res) => {
   console.log(req.user);
+  if (!req.user) {
+    res.status(401).json({ message: "Unauthorized" });
+    return;
+  }
   const data = req.user as any;
+  let grantedScopes: string[] = [];
+  const key = `auth:${data?.username}`;
+  const cacheData = await redisClient.get(key);
+  if (cacheData) {
+    grantedScopes = cacheData.split(", ");
+  } else {
+    try {
+      const octokit = new Octokit({ auth: data.accessToken });
+      const response = await octokit.request("GET /");
+      grantedScopes = response.headers["x-oauth-scopes"]
+        .split(", ")
+        .map((s: string) => s.trim());
+      await redisClient.set(key, grantedScopes.join(", "), { EX: 3600 });
+    } catch (err) {
+      console.error("[AUTH SVC ERROR]", err);
+      res.status(401).json({ message: "Unauthorized" });
+    }
+  }
   const profile = {
     id: data?.id,
     displayName: data?.displayName,
     username: data?.username,
     avatarUrl: data?.photos[0]?.value,
     profileUrl: data?.profileUrl,
+    permissions: grantedScopes,
   };
+  console.log(profile);
   res.json(profile);
   return;
 });

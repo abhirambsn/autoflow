@@ -1,10 +1,9 @@
 import Pagination from "@/components/Pagination";
 import { RepositoryService } from "@/service/RepositoryService";
-import { useAuthState } from "@/store";
+import { useAuthState, useRepoState } from "@/store";
 import { calculatePageSlice, capitalizeText } from "@/utils";
 import {
   Bar,
-  BusyIndicator,
   Button,
   FlexBox,
   Icon,
@@ -44,7 +43,8 @@ export const RepositoriesPage = () => {
   const handleSearch = (e: Ui5CustomEvent<InputDomRef>) => {
     setSearchTerm(e.target.value);
   };
-  const [repos, setRepos] = useState<Repo[]>([]);
+  const repos = useRepoState((state) => state.repos);
+  const setRepoState = useRepoState((state) => state.setRepoState);
   const [filteredRepos, setFilteredRepos] = useState<Repo[]>([]);
   const [slicedRepos, setSlicedRepos] = useState<Repo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,17 +75,17 @@ export const RepositoriesPage = () => {
     (async () => {
       if (!accessToken) return;
       const data = await serviceRef.current.getRepositories(accessToken);
-      setRepos(data);
+      setRepoState({ repos: data });
       setFilteredRepos(data);
       setLoading(false);
     })();
-  }, [accessToken]);
+  }, [setRepoState, accessToken]);
 
   async function refreshRepos() {
     setLoading(true);
     if (!accessToken) return;
     const data = await serviceRef.current.getRepositories(accessToken, true);
-    setRepos(data);
+    setRepoState({ repos: data });
     setFilteredRepos(data);
     setLoading(false);
   }
@@ -115,86 +115,84 @@ export const RepositoriesPage = () => {
       </Title>
 
       <div style={{ gap: "2rem" }}>
-        <BusyIndicator
-          style={{ display: "block" }}
-          active={loading}
-          delay={5}
-          size="M"
-        >
-          <FlexBox direction="Column" fitContainer>
-            <Bar design="Header">
-              <div slot="startContent">
-                <Text>
-                  Showing {(currentPage-1) * 10} to {(currentPage-1) * 10 + 10} of{" "}
-                  {filteredRepos.length} records
-                </Text>
-              </div>
-              <Input
-                placeholder="Search by name, description"
-                icon={<Icon name="search" />}
-                onInput={handleSearch}
-                onChange={triggerSearch}
-              />
-              <div slot="endContent">
-                <Button
-                  icon="clear-filter"
-                  tooltip="Clear Search Filters"
-                  onClick={clearSearch}
-                />
-                <Button
-                  icon="refresh"
-                  onClick={refreshRepos}
-                  tooltip="Refresh Data"
-                />
-              </div>
-            </Bar>
-            <Table headerRow={<TableHeader />} rowActionCount={1}>
-              <TableSelection mode="Multiple" slot="features" />
-              <TableVirtualizer rowCount={10} slot="features" />
-              {slicedRepos.map((repo) => (
-                <TableRow key={repo.id} rowKey={repo.id}>
-                  <TableCell>
-                    <Text>{repo.id}</Text>
-                  </TableCell>
-                  <TableCell>
-                    <Text>
-                      <Link
-                        target="_blank"
-                        rel="noopener noreferer"
-                        href={repo.url}
-                      >
-                        {repo.full_name}
-                      </Link>
-                    </Text>
-                  </TableCell>
-                  <TableCell>
-                    <Tag
-                      colorScheme={repo.type === "private" ? "6" : "5"}
-                      icon={
-                        <Icon
-                          name={repo.type === "private" ? "locked" : "unlocked"}
-                        />
-                      }
-                      design="Set2"
-                    >
-                      {capitalizeText(repo.type)}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>
-                    <Text emptyIndicatorMode="On">{repo.description}</Text>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </Table>
-            <Pagination
-              dataSize={filteredRepos.length}
-              perPage={10}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              onPageChange={onPageChange}
+        <FlexBox direction="Column" fitContainer>
+          <Bar design="Header">
+            <div slot="startContent">
+              <Text>
+                Showing {(currentPage - 1) * 10} to{" "}
+                {(currentPage - 1) * 10 + 10} of {filteredRepos.length} records
+              </Text>
+            </div>
+            <Input
+              placeholder="Search by name, description"
+              icon={<Icon name="search" />}
+              onInput={handleSearch}
+              onChange={triggerSearch}
             />
-          </FlexBox>
-        </BusyIndicator>
+            <div slot="endContent">
+              <Button
+                icon="clear-filter"
+                tooltip="Clear Search Filters"
+                onClick={clearSearch}
+              />
+              <Button
+                icon="refresh"
+                onClick={refreshRepos}
+                tooltip="Refresh Data"
+              />
+            </div>
+          </Bar>
+          <Table
+            loading={loading}
+            loadingDelay={50}
+            headerRow={<TableHeader />}
+            rowActionCount={1}
+          >
+            <TableSelection mode="Multiple" slot="features" />
+            <TableVirtualizer rowCount={10} slot="features" />
+            {slicedRepos.map((repo) => (
+              <TableRow key={repo.id} rowKey={repo.id}>
+                <TableCell>
+                  <Text>{repo.id}</Text>
+                </TableCell>
+                <TableCell>
+                  <Text>
+                    <Link
+                      target="_blank"
+                      rel="noopener noreferer"
+                      href={repo.url}
+                    >
+                      {repo.full_name}
+                    </Link>
+                  </Text>
+                </TableCell>
+                <TableCell>
+                  <Tag
+                    colorScheme={repo.type === "private" ? "6" : "5"}
+                    icon={
+                      <Icon
+                        name={repo.type === "private" ? "locked" : "unlocked"}
+                      />
+                    }
+                    design="Set2"
+                  >
+                    {capitalizeText(repo.type)}
+                  </Tag>
+                </TableCell>
+                <TableCell>
+                  <Text emptyIndicatorMode="On">{repo.description}</Text>
+                </TableCell>
+              </TableRow>
+            ))}
+          </Table>
+          <Pagination
+            dataSize={filteredRepos.length}
+            perPage={10}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            onPageChange={onPageChange}
+          />
+        </FlexBox>
       </div>
     </section>
   );

@@ -35,6 +35,7 @@ declare interface User {
   username: string;
   avatarUrl: string;
   profileUrl: string;
+  permissions: string[];
 }
 
 declare interface SidebarLink {
@@ -43,4 +44,23 @@ declare interface SidebarLink {
   type: "action" | "link";
   action?: () => void;
   href?: string;
+}
+
+declare interface ModuleData {
+  id?: string;
+  name: string;
+  description: string;
+  version: string;
+  repo: Repo;
+  workflowType: "github" | "jenkins" | "none";
+  hasDockerfile: boolean;
+  hasKubernetes: boolean;
+  hasDockerCompose: boolean;
+  hasPipeline: boolean;
+  requiresDockerfile: boolean;
+  requiresKubernetes: boolean;
+  requiresDockerCompose: boolean;
+  requiresPipeline: boolean;
+  branch: string;
+  otherRequirements?: string;
 }

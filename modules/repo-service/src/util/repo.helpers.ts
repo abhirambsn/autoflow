@@ -7,7 +7,7 @@ export const parseRepoData = (
     id: repo.id,
     name: repo.name,
     full_name: repo.full_name,
-    author: repo.owner.name,
+    author: repo.owner.login,
     description: repo.description,
     url: repo.html_url,
     type: repo.visibility,
