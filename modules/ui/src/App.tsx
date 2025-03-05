@@ -7,16 +7,44 @@ import { ThemeContextProvider } from "./context/ThemeContext";
 import { setTheme } from "@ui5/webcomponents-base/dist/config/Theme.js";
 import { useCallback, useEffect } from "react";
 import axios from "axios";
+// import OnboardingWizardDialog from "./components/OnboardingWizardDialog";
 
 function App() {
   const navState = useNavState();
   const authState = useAuthState();
+  const setAuthState = useAuthState((state) => state.setAuthState);
+  const refreshSession = useAuthState((state) => state.refreshSession);
+  // const [onboardingWizardOpen, setOnboardingWizardOpen] = useState(false);
 
   const toggleSidebar = () => {
     navState.setNavState({
       layout: navState.layout === "Collapsed" ? "Expanded" : "Collapsed",
     });
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshSession();
+    }, 60 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [refreshSession]);
+
+  // const openOnboardingWizard = useCallback(() => {
+  //   console.log("Opening onboarding wizard...");
+  //   setOnboardingWizardOpen(true);
+  // }, [setOnboardingWizardOpen]);
+
+  // const closeOnboardigWizard = useCallback(() => {
+  //   setOnboardingWizardOpen(false);
+  // }, [setOnboardingWizardOpen]);
+
+  // useEffect(() => {
+  //   document.addEventListener("onboard-repo", openOnboardingWizard);
+
+  //   return () =>
+  //     document.removeEventListener("onboard-repo", openOnboardingWizard);
+  // });
 
   const getUserDetails = useCallback(async () => {
     if (Object.keys(authState.user).length > 0) return;
@@ -28,13 +56,13 @@ function App() {
         }
       );
       if (res.data) {
-        authState.setAuthState({ user: res.data, isAuthenticated: true });
+        setAuthState({ user: res.data, isAuthenticated: true });
       }
     } catch (err) {
-      console.error('[AUTH ERROR]', err);
-      authState.setAuthState({ isAuthenticated: false, user: {} as User });
+      console.error("[AUTH ERROR]", err);
+      setAuthState({ isAuthenticated: false, user: {} as User });
     }
-  }, [authState]);
+  }, [authState, setAuthState]);
 
   useEffect(() => {
     getUserDetails();
@@ -45,6 +73,19 @@ function App() {
       await setTheme("sap_horizon_dark");
     })();
   }, []);
+
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("token");
+    const refreshToken = new URLSearchParams(window.location.search).get(
+      "refresh_token"
+    );
+    if (token) {
+      setAuthState({ accessToken: token });
+    }
+    if (refreshToken) {
+      setAuthState({ refreshToken });
+    }
+  }, [setAuthState]);
 
   return (
     <ThemeContextProvider>

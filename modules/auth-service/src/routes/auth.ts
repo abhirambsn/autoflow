@@ -1,6 +1,7 @@
 import { Router } from "express";
 import passport, { use } from "passport";
 import { Strategy as GithubStrategy } from "passport-github2";
+import jwt from "jsonwebtoken";
 
 export const authRouter = Router();
 
@@ -17,7 +18,7 @@ passport.use(
       profile: any,
       done: any
     ) {
-      return done(null, profile);
+      return done(null, { ...profile, accessToken: access_token });
     }
   )
 );
@@ -37,7 +38,19 @@ authRouter.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/login" }),
   (req, res) => {
-    res.redirect("http://localhost:5173/");
+    const user = req.user as any;
+    const payload = {
+      accessToken: user?.accessToken,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+      expiresIn: "1h",
+    });
+    const refreshToken = jwt.sign(payload, process.env.JWT_SECRET as string, {
+      expiresIn: "7d",
+    });
+    res.redirect(
+      `http://localhost:5173/?token=${token}&refreshToken=${refreshToken}`
+    );
   }
 );
 
@@ -59,4 +72,16 @@ authRouter.get("/logout", (req, res) => {
   req.logout(() => {
     res.redirect("http://localhost:5173/login");
   });
+});
+
+authRouter.post("/refresh", (req, res) => {
+  const { refreshToken } = req.body;
+  const payload = jwt.verify(refreshToken, process.env.JWT_SECRET as string);
+  const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
+    expiresIn: "1h",
+  });
+  const newRefreshToken = jwt.sign(payload, process.env.JWT_SECRET as string, {
+    expiresIn: "7d",
+  });
+  res.json({ accessToken: token, refreshToken: newRefreshToken });
 });

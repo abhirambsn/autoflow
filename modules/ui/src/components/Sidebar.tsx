@@ -1,3 +1,4 @@
+import { SidebarLinks } from "@/constants/sidebar-links";
 import { useTheme } from "@/context/ThemeContext";
 import { useNavState } from "@/store";
 import { SideNavigation, SideNavigationItem } from "@ui5/webcomponents-react";
@@ -11,6 +12,16 @@ function Sidebar({ slot }: SidebarProps) {
   const navState = useNavState();
   const navigate = useNavigate();
   const { toggleTheme } = useTheme();
+
+  const handleNavigation = (link: SidebarLink) => {
+    if (link.type === "link" && link.href) {
+      navigate(link.href);
+    } else {
+      if (link.action) {
+        link.action();
+      }
+    }
+  };
 
   return (
     <SideNavigation
@@ -36,21 +47,17 @@ function Sidebar({ slot }: SidebarProps) {
       }
       slot={slot}
     >
-      <SideNavigationItem
-        icon="home"
-        text="Home"
-        onClick={() => navigate("/")}
-      />
-      <SideNavigationItem
-        icon="list"
-        text="Page 1"
-        onClick={() => navigate("/page1")}
-      />
-      <SideNavigationItem
-        icon="light-mode"
-        text="Page 2"
-        onClick={() => navigate("/page2")}
-      />
+      {SidebarLinks.map((link, index) => (
+        <SideNavigationItem
+          key={index}
+          slot=""
+          icon={link.icon}
+          text={link.title}
+          unselectable={link.type === "action"}
+          design={link.type === "action" ? "Action" : "Default"}
+          onClick={() => handleNavigation(link)}
+        />
+      ))}
     </SideNavigation>
   );
 }

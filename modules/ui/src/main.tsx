@@ -14,8 +14,9 @@ import "@ui5/webcomponents-react/dist/themes/sap_horizon_dark.css";
 import "@ui5/webcomponents-react/dist/themes/sap_horizon.css";
 
 // Pages
-import { HomePage } from "@/pages";
+import { HomePage, RepositoriesPage } from "@/pages";
 import LoginPage from "./pages/LoginPage.tsx";
+import OnboardRepositoryPage from "./pages/OnboardRepositoryPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
@@ -25,8 +26,10 @@ createRoot(document.getElementById("root")!).render(
           <Route index element={<HomePage />} />
           <Route path="page1" element={<div>Page 1</div>} />
           <Route path="page2" element={<div>Page 2</div>} />
+          <Route path="repositories" element={<RepositoriesPage />} />
         </Route>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="onboard" element={<OnboardRepositoryPage />} />
       </Routes>
     </BrowserRouter>
   </ThemeProvider>

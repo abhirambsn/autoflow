@@ -1,21 +1,46 @@
 declare interface NavState {
-    currentPage: string;
-    theme: string;
-    layout: "Collapsed" | "Expanded" | "Auto";
-    setNavState: (state: Partial<NavState>) => void;
+  currentPage: string;
+  theme: string;
+  layout: "Collapsed" | "Expanded" | "Auto";
+  setNavState: (state: Partial<NavState>) => void;
 }
 
 declare interface AuthState {
-    accessToken: string;
-    refreshToken: string;
-    user: User;
-    isAuthenticated: boolean;
-    setAuthState: (state: Partial<AuthState>) => void;
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+  isAuthenticated: boolean;
+  setAuthState: (state: Partial<AuthState>) => void;
+  refreshSession: () => Promise<void>;
+}
+
+declare interface Repo {
+  id: string;
+  name: string;
+  full_name: string;
+  author: string;
+  description: string;
+  url: string;
+  type: string;
+}
+
+declare interface RepoState {
+  repos: Repo[];
+  onboardedRepos: Repo[];
+  setRepoState: (state: Partial<RepoState>) => void;
 }
 
 declare interface User {
-    displayName: string;
-    username: string;
-    avatarUrl: string;
-    profileUrl: string;
+  displayName: string;
+  username: string;
+  avatarUrl: string;
+  profileUrl: string;
+}
+
+declare interface SidebarLink {
+  title: string;
+  icon: string;
+  type: "action" | "link";
+  action?: () => void;
+  href?: string;
 }
