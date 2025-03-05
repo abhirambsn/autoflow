@@ -35,4 +35,19 @@ export class RepositoryService {
       return [];
     }
   }
+
+  async createModule(access_token: string, data: ModuleData) {
+    const url = `${this.url}/api/v1/repositories/`;
+    try {
+      const res = await axios.post(url, data, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+      return res.data;
+    } catch (err) {
+      console.error("[REPO SVC ERROR]", err);
+      throw new Error("Failed to create module");
+    }
+  }
 }

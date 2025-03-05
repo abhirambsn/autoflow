@@ -1,40 +1,25 @@
+import ModuleOnboardingForm from "@/components/ModuleOnboardingForm";
+import RepositoryTable from "@/components/RepositoryTable";
 import { RepositoryService } from "@/service/RepositoryService";
 import { useAuthState, useRepoState } from "@/store";
-import { capitalizeText } from "@/utils";
 import {
   Bar,
   Button,
   FlexBox,
-  Icon,
   Input,
-  Link,
-  Table,
-  TableCell,
-  TableHeaderCell,
-  TableHeaderRow,
-  TableRow,
-  TableSelection,
   TableSelectionDomRef,
-  TableVirtualizer,
-  Tag,
   Text,
   Title,
   Ui5CustomEvent,
   Wizard,
   WizardStep,
-  Form,
-  FormGroup,
-  FormItem,
-  Label,
-  Select,
-  Option,
-  CheckBox,
-  TextArea,
   MessageStrip,
 } from "@ui5/webcomponents-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 
 function OnboardRepositoryPage() {
+  const navigate = useNavigate();
   const user = useAuthState((state) => state.user);
 
   const permissionUrl = `http://localhost:3000/api/v1/auth/github`;
@@ -58,6 +43,9 @@ function OnboardRepositoryPage() {
   const [selectRepoBranches, setSelectedRepoBranches] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [messageVisible, setMessageVisible] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
   const [moduleOnboardingData, setModuleOnboardingData] = useState<ModuleData>({
     name: "",
@@ -75,17 +63,8 @@ function OnboardRepositoryPage() {
     version: "1.0.0",
     workflowType: "github",
     otherRequirements: "",
+    email: "",
   });
-
-  const TableHeader = ({ slot }: { slot?: string }) => {
-    return (
-      <TableHeaderRow slot={slot} sticky>
-        <TableHeaderCell>Repository Name</TableHeaderCell>
-        <TableHeaderCell>Type</TableHeaderCell>
-        <TableHeaderCell>Link</TableHeaderCell>
-      </TableHeaderRow>
-    );
-  };
 
   useEffect(() => {
     if (!selectedRepo) return;
@@ -100,18 +79,15 @@ function OnboardRepositoryPage() {
   }, [selectedRepo, access_token]);
 
   function nextStep(prevStep: string, step: string) {
-    console.log("Moving to step", step);
     setSelected(step);
     setDisabled((prev) => ({ ...prev, [step]: false, [prevStep]: true }));
   }
 
   function validateForm() {
-    console.log("Validating form...", moduleOnboardingData);
-    const keys = ["name", "version", "branch", "description"];
+    const keys = ["name", "version", "branch", "description", "email"];
     const valid = keys.every(
       (key) => !!moduleOnboardingData[key as keyof ModuleData]
     );
-    console.log("Form validation result: ", valid);
     return valid;
   }
 
@@ -153,6 +129,40 @@ function OnboardRepositoryPage() {
       editFormValue("branch", selectRepoBranches[0]);
     }
     nextStep("2", "3");
+  }
+
+  function dismissErrorMessage(index: number) {
+    setErrorMessages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function validateEmail(email: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  async function startOnboarding() {
+    setSubmitting(true);
+    const isFormValid = validateForm();
+    if (!isFormValid) {
+      setErrorMessages(["Please fill all required fields"]);
+      return;
+    }
+    if (!validateEmail(moduleOnboardingData.email)) {
+      setErrorMessages(["Please enter a valid email"]);
+      return;
+    }
+    setErrorMessages([]);
+    try {
+      const resp = await repoServiceRef.current.createModule(
+        access_token,
+        moduleOnboardingData
+      );
+      navigate(`/modules/${resp.id}`);
+    } catch (err) {
+      console.error("[REPO SVC ERROR]", err);
+      setErrorMessages(["Failed to onboard module. Please try again later."]);
+      setSubmitting(false);
+    }
+    return;
   }
 
   return (
@@ -204,46 +214,12 @@ function OnboardRepositoryPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </Bar>
-          <Table headerRow={<TableHeader />}>
-            <TableVirtualizer slot="features" rowCount={10} />
-            <TableSelection
-              onChange={onRepoSelect}
-              mode="Single"
-              slot="features"
-            />
-
-            {repos
-              .filter((repo) => repo.name.includes(searchTerm))
-              .map((repo) => (
-                <TableRow key={repo.id} rowKey={repo.id}>
-                  <TableCell>
-                    <Text>{repo.full_name}</Text>
-                  </TableCell>
-                  <TableCell>
-                    <Tag
-                      colorScheme={repo.type === "private" ? "6" : "5"}
-                      icon={
-                        <Icon
-                          name={repo.type === "private" ? "locked" : "unlocked"}
-                        />
-                      }
-                      design="Set2"
-                    >
-                      {capitalizeText(repo.type)}
-                    </Tag>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={repo.url}
-                      rel="noopener noreferer"
-                      target="_blank"
-                    >
-                      {repo.url}
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </Table>
+          <RepositoryTable
+            repos={repos}
+            searchTerm={searchTerm}
+            type="wizard"
+            onRepoSelect={onRepoSelect}
+          />
         </FlexBox>
         {selectedRepo && (
           <Button
@@ -273,147 +249,14 @@ function OnboardRepositoryPage() {
                 necessary permissions to access this repository.
               </MessageStrip>
             )}
-            <Form labelSpan="S12 M4 L4 XL4" layout="S1 M1 L2 XL2">
-              <FormGroup headerText="Module Details">
-                <FormItem labelContent={<Label>Module Name</Label>}>
-                  <Input
-                    value={moduleOnboardingData.name}
-                    required
-                    onInput={(e) => editFormValue("name", e.target.value)}
-                  />
-                </FormItem>
-                <FormItem labelContent={<Label>Version</Label>}>
-                  <Input
-                    value={moduleOnboardingData.version}
-                    required
-                    onInput={(e) => editFormValue("version", e.target.value)}
-                  />
-                </FormItem>
-                <FormItem labelContent={<Label>Branch</Label>}>
-                  <Select
-                    onChange={(e) => editFormValue("branch", e.target.value)}
-                    required
-                    valueState="None"
-                  >
-                    {selectRepoBranches.map((branch) => (
-                      <Option key={branch}>{branch}</Option>
-                    ))}
-                  </Select>
-                </FormItem>
-                <FormItem labelContent={<Label>Description</Label>}>
-                  <TextArea
-                    value={moduleOnboardingData.description}
-                    onInput={(e) =>
-                      editFormValue("description", e.target.value)
-                    }
-                    rows={5}
-                    placeholder="A short module description"
-                  />
-                </FormItem>
-              </FormGroup>
-              <FormGroup headerText="Repository Details">
-                <FormItem labelContent={<Label>Name</Label>}>
-                  <Input value={selectedRepo.name} disabled />
-                </FormItem>
-                <FormItem labelContent={<Label>Github Link</Label>}>
-                  <Input value={selectedRepo.url} disabled />
-                </FormItem>
-                <FormItem labelContent={<Label>Description</Label>}>
-                  <Input value={selectedRepo.description} disabled />
-                </FormItem>
-                <FormItem labelContent={<Label>Author</Label>}>
-                  <Input value={selectedRepo.author} disabled />
-                </FormItem>
-              </FormGroup>
-
-              <FormGroup headerText="Deployment Settings">
-                <FormItem labelContent={<Label>Pipeline Type</Label>}>
-                  <Select
-                    disabled={!moduleOnboardingData.requiresPipeline}
-                    onChange={(e) =>
-                      editFormValue("workflowType", e.target.value)
-                    }
-                    value={moduleOnboardingData.workflowType}
-                  >
-                    <Option value="github">Github Actions</Option>
-                    <Option value="jenkins">Jenkins</Option>
-                    <Option value="none">None</Option>
-                  </Select>
-                </FormItem>
-
-                <FormItem labelContent={<Label>Generate Dockerfile</Label>}>
-                  <CheckBox
-                    checked={moduleOnboardingData.requiresDockerfile}
-                    onChange={(e) =>
-                      handleRelatedBooleanChange(
-                        "requiresDockerfile",
-                        "hasDockerfile",
-                        e.target.checked
-                      )
-                    }
-                  />
-                </FormItem>
-
-                <FormItem labelContent={<Label>Generate Docker Compose</Label>}>
-                  <CheckBox
-                    checked={moduleOnboardingData.requiresDockerCompose}
-                    onChange={(e) =>
-                      handleRelatedBooleanChange(
-                        "requiresDockerCompose",
-                        "hasDockerCompose",
-                        e.target.checked
-                      )
-                    }
-                  />
-                </FormItem>
-
-                <FormItem
-                  labelContent={<Label>Generate Kubernetes Manifests</Label>}
-                >
-                  <CheckBox
-                    checked={moduleOnboardingData.requiresKubernetes}
-                    onChange={(e) =>
-                      handleRelatedBooleanChange(
-                        "requiresKubernetes",
-                        "hasKubernetes",
-                        e.target.checked
-                      )
-                    }
-                  />
-                </FormItem>
-
-                <FormItem labelContent={<Label>Generate Pipeline File</Label>}>
-                  <CheckBox
-                    checked={moduleOnboardingData.requiresPipeline}
-                    onChange={(e) => {
-                      handleRelatedBooleanChange(
-                        "requiresPipeline",
-                        "hasPipeline",
-                        e.target.checked
-                      );
-                      if (!e.target.checked) {
-                        editFormValue("workflowType", "none");
-                      }
-                    }}
-                  />
-                </FormItem>
-              </FormGroup>
-
-              <FormGroup headerText="Other Details">
-                <FormItem
-                  labelContent={<Label>Other Requirements (if any)</Label>}
-                >
-                  <TextArea
-                    value={moduleOnboardingData.otherRequirements}
-                    onInput={(e) =>
-                      editFormValue("otherRequirements", e.target.value)
-                    }
-                    rows={5}
-                    placeholder="Write additonal requirements in the files (if any)"
-                  />
-                </FormItem>
-              </FormGroup>
-            </Form>
+            <ModuleOnboardingForm
+              selectedRepo={selectedRepo}
+              selectRepoBranches={selectRepoBranches}
+              editFormValue={editFormValue}
+              handleRelatedBooleanChange={handleRelatedBooleanChange}
+              moduleOnboardingData={moduleOnboardingData}
+              reviewMode={false}
+            />
           </FlexBox>
         )}
         <FlexBox direction="Row" justifyContent="SpaceBetween">
@@ -439,8 +282,58 @@ function OnboardRepositoryPage() {
         selected={selected === "4"}
         icon="accept"
         titleText="Review and Done"
+        style={{ gap: "1rem" }}
       >
-        <Title>Review and Submit</Title>
+        <Title style={{ marginBottom: "0.1rem" }}>Review and Submit</Title>
+
+        {errorMessages.length > 0 &&
+          errorMessages.map((msg, i) => (
+            <MessageStrip
+              key={i}
+              onClose={() => dismissErrorMessage(i)}
+              design="Negative"
+              style={{ marginBottom: "0.25rem" }}
+            >
+              {msg}
+            </MessageStrip>
+          ))}
+
+        {selectedRepo && (
+          <ModuleOnboardingForm
+            selectedRepo={selectedRepo}
+            selectRepoBranches={selectRepoBranches}
+            editFormValue={editFormValue}
+            handleRelatedBooleanChange={handleRelatedBooleanChange}
+            moduleOnboardingData={moduleOnboardingData}
+            reviewMode
+          />
+        )}
+
+        <FlexBox direction="Row" justifyContent="SpaceBetween">
+          <Button
+            style={{ marginTop: "1rem" }}
+            design="Default"
+            onClick={() => {
+              nextStep("4", "3");
+              setErrorMessages([]);
+            }}
+            disabled={submitting}
+          >
+            Previous
+          </Button>
+          <Button
+            style={{ marginTop: "1rem" }}
+            design="Emphasized"
+            disabled={
+              errorMessages.length > 0 ||
+              submitting ||
+              (!validateForm() && !selectedRepo)
+            }
+            onClick={startOnboarding}
+          >
+            Submit
+          </Button>
+        </FlexBox>
       </WizardStep>
     </Wizard>
   );

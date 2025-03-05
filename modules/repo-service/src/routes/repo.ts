@@ -3,6 +3,7 @@ import { Octokit } from "@octokit/rest";
 import jwt from "jsonwebtoken";
 import { createClient, RedisClientType } from "redis";
 import { parseRepoData } from "../util";
+import { ModuleModel } from "../entity";
 
 declare global {
   namespace Express {
@@ -93,6 +94,40 @@ repoRouter.get("/:repoId/:owner/branches", parseJwt, async (req, res) => {
     const data = resp.data.map((branch) => branch.name);
     await redisClient.set(cacheKey, JSON.stringify(data), { EX: 3600 });
     res.json(data);
+    return;
+  } catch (err) {
+    console.error("[REPO ERROR]", err);
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
+  }
+});
+
+repoRouter.post("/", parseJwt, async (req, res) => {
+  try {
+    const newModule = await ModuleModel.create(req.body);
+    await newModule.save();
+    res.status(201).json(newModule);
+    return;
+  } catch (err) {
+    console.error("[REPO ERROR]", err);
+    res.status(500).json({ message: "Internal Server Error" });
+    return;
+  }
+});
+
+repoRouter.get("/module/:id", parseJwt, async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      res.status(400).json({ message: "Module ID is required" });
+      return;
+    }
+    const module = await ModuleModel.findOne({ id });
+    if (!module) {
+      res.status(404).json({ message: "Module not found" });
+      return;
+    }
+    res.json(module);
     return;
   } catch (err) {
     console.error("[REPO ERROR]", err);

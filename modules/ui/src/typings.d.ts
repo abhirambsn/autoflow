@@ -63,4 +63,5 @@ declare interface ModuleData {
   requiresPipeline: boolean;
   branch: string;
   otherRequirements?: string;
+  email: string;
 }
