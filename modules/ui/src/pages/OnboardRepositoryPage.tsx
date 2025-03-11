@@ -15,6 +15,7 @@ import {
   WizardStep,
   MessageStrip,
 } from "@ui5/webcomponents-react";
+import { AxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -31,7 +32,7 @@ function OnboardRepositoryPage() {
   const [disabled, setDisabled] = useState<Record<string, boolean>>({
     "1": !permissionsNeeded,
     "2": false,
-    "3": false,
+    "3": true,
     "4": true,
   });
 
@@ -64,6 +65,7 @@ function OnboardRepositoryPage() {
     workflowType: "github",
     otherRequirements: "",
     email: "",
+    ownerId: user.id,
   });
 
   useEffect(() => {
@@ -75,8 +77,9 @@ function OnboardRepositoryPage() {
         selectedRepo.author
       );
       setSelectedRepoBranches(branches);
+      console.log(user.id);
     })();
-  }, [selectedRepo, access_token]);
+  }, [selectedRepo, access_token, user]);
 
   function nextStep(prevStep: string, step: string) {
     setSelected(step);
@@ -122,6 +125,7 @@ function OnboardRepositoryPage() {
   }
   function populateFormAndNextStep() {
     if (!selectedRepo) return;
+    console.log("[SELECTED REPO]", selectedRepo);
     editFormValue("repo", selectedRepo);
     editFormValue("name", selectedRepo.name);
     editFormValue("description", selectedRepo.description);
@@ -152,6 +156,7 @@ function OnboardRepositoryPage() {
     }
     setErrorMessages([]);
     try {
+      console.log("[MODULE DATA]", moduleOnboardingData);
       const resp = await repoServiceRef.current.createModule(
         access_token,
         moduleOnboardingData
@@ -159,7 +164,11 @@ function OnboardRepositoryPage() {
       navigate(`/modules/${resp.id}`);
     } catch (err) {
       console.error("[REPO SVC ERROR]", err);
-      setErrorMessages(["Failed to onboard module. Please try again later."]);
+      const messages = ["Failed to onboard module. Please try again later."];
+      if (err instanceof AxiosError) {
+        messages.push(err.response?.data?.message);
+      }
+      setErrorMessages(messages);
       setSubmitting(false);
     }
     return;

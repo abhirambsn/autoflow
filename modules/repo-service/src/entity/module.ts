@@ -6,7 +6,7 @@ const RepoSchema = new Schema({
   name: { type: String, required: true },
   full_name: { type: String, required: true },
   author: { type: String, required: true },
-  description: { type: String, required: true },
+  description: { type: String },
   url: { type: String, required: true },
   type: { type: String, required: true, enum: ["private", "public"] },
 });
@@ -33,6 +33,7 @@ const ModuleSchema = new Schema({
   branch: { type: String, required: true },
   otherRequirements: { type: String },
   email: { type: String, required: true },
-});
+  ownerId: { type: String, required: true },
+}, { timestamps: true });
 
 export const ModuleModel = model("modules", ModuleSchema);

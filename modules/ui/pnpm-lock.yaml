@@ -32,6 +32,9 @@ importers:
       '@ui5/webcomponents-react':
         specifier: ^2.7.2
         version: 2.7.2(@types/react-dom@19.0.4(@types/react@19.0.10))(@types/react@19.0.10)(@ui5/webcomponents-base@2.7.3)(@ui5/webcomponents-fiori@2.7.3)(@ui5/webcomponents-icons@2.7.3)(@ui5/webcomponents@2.7.3)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@ui5/webcomponents-react-base':
+        specifier: ^2.7.2
+        version: 2.7.2(@types/react@19.0.10)(@ui5/webcomponents-base@2.7.3)(react@19.0.0)
       axios:
         specifier: ^1.8.1
         version: 1.8.1

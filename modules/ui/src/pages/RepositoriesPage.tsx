@@ -102,16 +102,18 @@ export const RepositoriesPage = () => {
               onChange={triggerSearch}
             />
             <div slot="endContent">
-              <Button
-                icon="clear-filter"
-                tooltip="Clear Search Filters"
-                onClick={clearSearch}
-              />
-              <Button
-                icon="refresh"
-                onClick={refreshRepos}
-                tooltip="Refresh Data"
-              />
+              <FlexBox gap={"0.5rem"} alignItems="Center">
+                <Button
+                  icon="clear-filter"
+                  tooltip="Clear Search Filters"
+                  onClick={clearSearch}
+                />
+                <Button
+                  icon="refresh"
+                  onClick={refreshRepos}
+                  tooltip="Refresh Data"
+                />
+              </FlexBox>
             </div>
           </Bar>
           <RepositoryTable

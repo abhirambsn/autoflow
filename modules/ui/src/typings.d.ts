@@ -26,7 +26,7 @@ declare interface Repo {
 
 declare interface RepoState {
   repos: Repo[];
-  onboardedRepos: Repo[];
+  onboardedRepos: ModuleData[];
   setRepoState: (state: Partial<RepoState>) => void;
 }
 
@@ -36,6 +36,7 @@ declare interface User {
   avatarUrl: string;
   profileUrl: string;
   permissions: string[];
+  id: string;
 }
 
 declare interface SidebarLink {
@@ -64,4 +65,7 @@ declare interface ModuleData {
   branch: string;
   otherRequirements?: string;
   email: string;
+  ownerId: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

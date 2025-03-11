@@ -1,6 +1,7 @@
 import { capitalizeText } from "@/utils";
 import {
   Icon,
+  IllustratedMessage,
   Link,
   Table,
   TableCell,
@@ -34,7 +35,6 @@ const TableHeader = ({
       <TableHeaderCell>Repository Name</TableHeaderCell>
       <TableHeaderCell>Repo Type</TableHeaderCell>
       <TableHeaderCell>Description</TableHeaderCell>
-      <TableHeaderCell></TableHeaderCell>
     </TableHeaderRow>
   );
 };
@@ -55,7 +55,10 @@ const RepositoryTable = ({
 }: RepoTableProps) => {
   if (type === "wizard") {
     return (
-      <Table headerRow={<TableHeader type={type} />}>
+      <Table
+        headerRow={<TableHeader type={type} />}
+        nodata={<IllustratedMessage name="NoData" />}
+      >
         <TableVirtualizer slot="features" rowCount={10} />
         <TableSelection onChange={onRepoSelect} mode="Single" slot="features" />
 
@@ -94,7 +97,7 @@ const RepositoryTable = ({
         loading={loading}
         loadingDelay={50}
         headerRow={<TableHeader type={type} />}
-        rowActionCount={1}
+        nodata={<IllustratedMessage name="NoData" />}
       >
         <TableSelection mode="Multiple" slot="features" />
         <TableVirtualizer rowCount={10} slot="features" />
