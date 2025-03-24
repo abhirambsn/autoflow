@@ -1,4 +1,5 @@
 import { RestEndpointMethodTypes } from "@octokit/rest";
+import { hash } from "node:crypto";
 
 export const parseRepoData = (
   resp: RestEndpointMethodTypes["repos"]["listForAuthenticatedUser"]["response"]
@@ -11,4 +12,5 @@ export const parseRepoData = (
     description: repo.description,
     url: repo.html_url,
     type: repo.visibility,
+    avatar: `https://www.gravatar.com/avatar/${hash('md5', repo.name).toString()}?d=identicon`,
   }));

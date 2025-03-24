@@ -9,6 +9,7 @@ const RepoSchema = new Schema({
   description: { type: String },
   url: { type: String, required: true },
   type: { type: String, required: true, enum: ["private", "public"] },
+  avatar: { type: String, required: true },
 });
 
 const ModuleSchema = new Schema({

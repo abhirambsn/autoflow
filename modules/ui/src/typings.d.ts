@@ -22,6 +22,7 @@ declare interface Repo {
   description: string;
   url: string;
   type: string;
+  avatar: string;
 }
 
 declare interface RepoState {

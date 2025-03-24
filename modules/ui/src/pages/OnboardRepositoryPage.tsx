@@ -1,5 +1,6 @@
 import ModuleOnboardingForm from "@/components/ModuleOnboardingForm";
 import RepositoryTable from "@/components/RepositoryTable";
+import { ModuleService } from "@/service/ModuleService";
 import { RepositoryService } from "@/service/RepositoryService";
 import { useAuthState, useRepoState } from "@/store";
 import {
@@ -39,6 +40,7 @@ function OnboardRepositoryPage() {
   const repos = useRepoState((state) => state.repos);
   const access_token = useAuthState((state) => state.accessToken);
   const repoServiceRef = useRef(new RepositoryService());
+  const moduleServiceRef = useRef(new ModuleService());
 
   const [selectedRepo, setSelectedRepo] = useState<Repo | null>(null);
   const [selectRepoBranches, setSelectedRepoBranches] = useState<string[]>([]);
@@ -157,7 +159,7 @@ function OnboardRepositoryPage() {
     setErrorMessages([]);
     try {
       console.log("[MODULE DATA]", moduleOnboardingData);
-      const resp = await repoServiceRef.current.createModule(
+      const resp = await moduleServiceRef.current.createModule(
         access_token,
         moduleOnboardingData
       );
