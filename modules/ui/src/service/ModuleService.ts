@@ -37,7 +37,7 @@ export class ModuleService {
       }
     
       async getModuleData(access_token: string, moduleId: string) {
-        const url = `${this.url}/api/v1/repositories/modules/${moduleId}`;
+        const url = `${this.url}/api/v1/modules/${moduleId}`;
         try {
           const res = await axios.get(url, {
             headers: {

@@ -1,3 +1,5 @@
+import { CommitTable } from "@/components/ModulePage";
+import { CommitService } from "@/service/CommitService";
 import { ModuleService } from "@/service/ModuleService";
 import { useAuthState } from "@/store";
 import {
@@ -20,7 +22,7 @@ import {
   Toolbar,
   ToolbarButton,
   IllustratedMessage,
-  Table,
+  Bar,
 } from "@ui5/webcomponents-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -29,8 +31,11 @@ function ModulePage() {
   const { module } = useParams();
   const access_token = useAuthState((state) => state.accessToken);
   const moduleServiceRef = useRef(new ModuleService());
+  const commitServiceRef = useRef(new CommitService());
 
   const [moduleData, setModuleData] = useState<ModuleData>();
+  const [commits, setCommits] = useState<CommitRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
 
   const getModuleDetails = useCallback(
@@ -46,15 +51,45 @@ function ModulePage() {
     [access_token]
   );
 
+  const getCommitDetails = useCallback(
+    async (repoId: string) => {
+      if (!access_token || !repoId) return;
+      const commitDetails = await commitServiceRef.current.getCommits(
+        access_token,
+        repoId
+      );
+      console.log(commitDetails);
+      return commitDetails;
+    },
+    [access_token]
+  );
+
+  async function refreshCommits() {
+    setLoading(true);
+    if (!access_token) return;
+    const data = await commitServiceRef.current.getCommits(
+      access_token,
+      moduleData?.repo?.id as string,
+      true
+    );
+    setCommits(data);
+    setLoading(false);
+  }
+
   useEffect(() => {
     console.log(module);
     (async () => {
       if (!module) return;
       const fetchedModuleData = await getModuleDetails(module);
+      const fetchedCommitDetails = await getCommitDetails(
+        fetchedModuleData?.repo?.id
+      );
       setModuleData(fetchedModuleData);
-      setError('');
+      setCommits(fetchedCommitDetails);
+      setLoading(false);
+      setError("");
     })();
-  }, [module, getModuleDetails]);
+  }, [module, getModuleDetails, getCommitDetails]);
   return (
     <ObjectPage
       headerArea={
@@ -65,9 +100,7 @@ function ModulePage() {
               <Link href={moduleData?.repo.url}>
                 {moduleData?.repo.full_name}
               </Link>
-              <Link href={moduleData?.repo.url}>
-                {moduleData?.repo.url}
-              </Link>
+              <Link href={moduleData?.repo.url}>{moduleData?.repo.url}</Link>
             </FlexBox>
             <FlexBox direction="Column" style={{ padding: "10px" }}>
               <Label>San Jose</Label>
@@ -116,9 +149,25 @@ function ModulePage() {
       placeholder={error && <IllustratedMessage name="UnableToLoad" />}
     >
       <ObjectPageSection aria-label="Commits" id="commits" titleText="Commits">
-        <Table>
-
-        </Table>
+        <FlexBox direction="Column" fitContainer>
+          <Bar design="Header">
+          <div slot="startContent">
+              <Text>
+                Showing Last 10 commits
+              </Text>
+            </div>
+            <div slot="endContent">
+              <FlexBox gap={"0.5rem"} alignItems="Center">
+                <Button
+                  icon="refresh"
+                  onClick={refreshCommits}
+                  tooltip="Refresh Data"
+                />
+              </FlexBox>
+            </div>
+          </Bar>
+          <CommitTable loading={loading} commits={commits} />
+        </FlexBox>
       </ObjectPageSection>
       <ObjectPageSection
         aria-label="Personal"

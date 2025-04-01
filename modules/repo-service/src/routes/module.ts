@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getOrCreateRedisClient, parseJwt } from "../util";
 import { ModuleModel } from "../entity";
+import { Octokit } from "@octokit/rest";
 
 export const moduleRouter = Router();
 
@@ -16,12 +17,25 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
       return;
     }
     const newModule = await ModuleModel.create(req.body);
+    const octokit = new Octokit({auth: req.token});
+    await octokit.repos.createWebhook({
+      owner: req.body.repo.author,
+      repo: req.body.repo.name,
+      name: "web",
+      active: true,
+      events: ["push"],
+      config: {
+        url: `${process.env.WEBHOOK_SERVICE_URL}/api/v1/webhook`,
+        content_type: "json",
+        secret: process.env.WEBHOOK_SECRET,
+      }
+    });
     await newModule.save();
     res.status(201).json(newModule);
     return;
   } catch (err) {
     console.error("[REPO ERROR]", err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: "Internal Server Error", error: err });
     return;
   }
 });

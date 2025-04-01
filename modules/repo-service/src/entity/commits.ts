@@ -2,10 +2,10 @@ import { model, Schema } from "mongoose";
 
 const CommitSchema = new Schema(
   {
-    moduleId: { type: String, required: true },
     commitId: { type: String, required: true },
     message: { type: String, required: true },
     author: { type: String, required: true },
+    email: { type: String, required: true },
     link: { type: String, required: true },
     commitTime: { type: Date, required: true },
     branch: { type: String, required: true },

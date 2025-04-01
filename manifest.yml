@@ -16,6 +16,15 @@ applications:
     env:
       NODE_ENV: production
       JWT_SECRET: Gh-jwt-alfaromeo-aramco-f1-team
+  
+
+  - name: autoflow-webhook-service
+    memory: 256M
+    instances: 1
+    docker:
+      image: abhirambsn/autoflow-webhook-service:latest
+    env:
+      NODE_ENV: production
     
   - name: autoflow-ui
     memory: 512M

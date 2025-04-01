@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import { moduleRouter, repoRouter } from "./routes";
+import { commitRouter, moduleRouter, repoRouter } from "./routes";
 import mongoose from "mongoose";
 import cors from "cors";
 
@@ -21,6 +21,7 @@ app.use(cors());
 
 app.use("/api/v1/repositories", repoRouter);
 app.use('/api/v1/modules', moduleRouter);
+app.use('/api/v1/commits', commitRouter);
 
 const PORT = process.env.PORT || 3001;
 

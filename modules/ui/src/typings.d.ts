@@ -70,3 +70,20 @@ declare interface ModuleData {
   createdAt?: string;
   updatedAt?: string;
 }
+
+declare interface CommitRecord {
+  commitId: string;
+  message: string;
+  author: string;
+  email: string;
+  link: string;
+  commitTime: string;
+  branch: string;
+  repoId: string;
+  module: {
+    id: string;
+    name: string;
+  }
+  createdAt?: string;
+  updatedAt?: string;
+}
