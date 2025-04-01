@@ -42,7 +42,7 @@ function Navbar({ toggleSidebar, slot }: Props) {
 
   const logout = () => {
     setAuthState({ isAuthenticated: false, user: {} as User });
-    window.location.assign("http://localhost:3000/api/v1/auth/logout");
+    window.location.assign(`${import.meta.env.VITE_API_URL}/api/v1/auth/logout`);
   };
 
   function handleItemClick(

@@ -24,7 +24,7 @@ function OnboardRepositoryPage() {
   const navigate = useNavigate();
   const user = useAuthState((state) => state.user);
 
-  const permissionUrl = `http://localhost:3000/api/v1/auth/github`;
+  const permissionUrl = `${import.meta.env.VITE_API_URL}/api/v1/auth/github`;
   const permissionsNeeded = !(
     user.permissions.includes("repo") && user.permissions.includes("workflow")
   );

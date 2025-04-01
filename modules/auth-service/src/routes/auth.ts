@@ -4,26 +4,18 @@ import { Strategy as GithubStrategy } from "passport-github2";
 import jwt from "jsonwebtoken";
 import { Octokit } from "octokit";
 import { createClient } from "redis";
+import { getOrCreateRedisClient } from "../utils";
 
 export const authRouter = Router();
 
 let redisClient: any;
-
-createClient({
-  url: process.env.REDIS_URL,
-})
-  .on("error", (err) => console.error("[REDIS ERROR]", err))
-  .connect()
-  .then((client) => {
-    redisClient = client;
-  });
 
 passport.use(
   new GithubStrategy(
     {
       clientID: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-      callbackURL: "http://localhost:3000/api/v1/auth/github/callback",
+      callbackURL: `${process.env.SELF_URL}/api/v1/auth/github/callback`,
     },
     function (
       access_token: string,
@@ -61,14 +53,15 @@ authRouter.get(
     const refreshToken = jwt.sign(payload, process.env.JWT_SECRET as string, {
       expiresIn: "7d",
     });
+    const uiUrl = process.env.UI_URL || "http://localhost:5173";
     res.redirect(
-      `http://localhost:5173/?token=${token}&refreshToken=${refreshToken}`
+      `${uiUrl}/?token=${token}&refreshToken=${refreshToken}`
     );
   }
 );
 
 authRouter.get("/", async (req, res) => {
-  console.log(req.user);
+  redisClient = await getOrCreateRedisClient();
   if (!req.user) {
     res.status(401).json({ message: "Unauthorized" });
     return;

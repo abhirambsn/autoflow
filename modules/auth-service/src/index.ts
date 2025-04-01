@@ -10,8 +10,10 @@ import passport from "passport";
 
 const app = express();
 
+const UI_URL = process.env.NODE_ENV === "production" ? "https://autoflow-ui.cfapps.us10-001.hana.ondemand.com" : "http://localhost:5173";
+console.log("UI_URL", UI_URL);
 app.use(express.json());
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors({ credentials: true, origin: UI_URL }));
 app.use(session({ secret: "secret", resave: false, saveUninitialized: true, cookie: {secure: false} }));
 
 app.get("/", (req, res) => {

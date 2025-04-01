@@ -2,7 +2,8 @@ import { Button } from "@ui5/webcomponents-react";
 
 function LoginButton() {
   const loginWithGithub = async () => {
-    const url = `http://localhost:3000/api/v1/auth/github`;
+    const url = `${import.meta.env.VITE_API_URL}/api/v1/auth/github`;
+    console.log('Env', import.meta.env, import.meta.env.VITE_API_URL);
     window.location.assign(url);
   };
   return (

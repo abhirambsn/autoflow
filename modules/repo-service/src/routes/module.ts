@@ -2,9 +2,9 @@ import { Router } from "express";
 import { getOrCreateRedisClient, parseJwt } from "../util";
 import { ModuleModel } from "../entity";
 
-let redisClient = getOrCreateRedisClient();
-
 export const moduleRouter = Router();
+
+let redisClient: any;
 
 moduleRouter.post("/", parseJwt, async (req, res) => {
   try {
@@ -27,6 +27,7 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
 });
 
 moduleRouter.get("/:id", parseJwt, async (req, res) => {
+  redisClient = await getOrCreateRedisClient();
   try {
     const id = req.params.id;
     if (!id) {
@@ -48,6 +49,7 @@ moduleRouter.get("/:id", parseJwt, async (req, res) => {
 });
 
 moduleRouter.get("/:ownerId/all", parseJwt, async (req, res) => {
+  redisClient = await getOrCreateRedisClient();
   const { ownerId } = req.params;
   if (!ownerId) {
     res.status(400).json({ message: "Owner ID is required" });

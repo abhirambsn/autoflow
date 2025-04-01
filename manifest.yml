@@ -1,0 +1,27 @@
+applications:
+  - name: autoflow-auth-service
+    memory: 256M
+    instances: 1
+    docker:
+      image: abhirambsn/autoflow-auth-service:latest
+    env:
+      NODE_ENV: production
+      SELF_URL: https://autoflow-auth-service.cfapps.us10-001.hana.ondemand.com
+
+  - name: autoflow-repo-service
+    memory: 256M
+    instances: 1
+    docker:
+      image: abhirambsn/autoflow-repo-service:latest
+    env:
+      NODE_ENV: production
+      JWT_SECRET: Gh-jwt-alfaromeo-aramco-f1-team
+    
+  - name: autoflow-ui
+    memory: 512M
+    instances: 1
+    docker:
+      image: abhirambsn/autoflow-ui:latest
+    env:
+      VITE_API_URL: https://autoflow-auth-service.cfapps.us10-001.hana.ondemand.com
+      VITE_GH_API_URL: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com

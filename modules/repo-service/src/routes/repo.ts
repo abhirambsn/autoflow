@@ -3,12 +3,13 @@ import { Octokit } from "@octokit/rest";
 import { getOrCreateRedisClient, parseJwt, parseRepoData } from "../util";
 import { ModuleModel } from "../entity";
 
-let redisClient = getOrCreateRedisClient();
+let redisClient: any;
 
 export const repoRouter = Router();
 
 repoRouter.get("/", parseJwt, async (req, res) => {
   try {
+    redisClient = await getOrCreateRedisClient();
     const octokit = new Octokit({ auth: req.token });
     const key = `repos:${req.token?.slice(5, 9)}`;
     const cacheData = await redisClient.get(key);
@@ -35,6 +36,7 @@ repoRouter.get("/", parseJwt, async (req, res) => {
 });
 
 repoRouter.get("/:repoId/:owner/branches", parseJwt, async (req, res) => {
+  redisClient = await getOrCreateRedisClient();
   const cacheKey = `branches:${req.params.repoId}`;
   const cacheData = await redisClient.get(cacheKey);
   if (cacheData) {

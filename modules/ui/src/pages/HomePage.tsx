@@ -1,6 +1,6 @@
 import ModuleTable from "@/components/ModuleTable";
 import Pagination from "@/components/Pagination";
-import { RepositoryService } from "@/service/RepositoryService";
+import { ModuleService } from "@/service/ModuleService";
 import { useAuthState, useRepoState } from "@/store";
 import { calculatePageSlice } from "@/utils";
 import {
@@ -22,7 +22,7 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const onboardedModules = useRepoState((state) => state.onboardedRepos);
   const setRepoState = useRepoState((state) => state.setRepoState);
-  const repoServiceRef = useRef(new RepositoryService());
+  const moduleServiceRef = useRef(new ModuleService());
 
   const isAuthenticated = useAuthState((state) => state.isAuthenticated);
   const accessToken = useAuthState((state) => state.accessToken);
@@ -75,7 +75,7 @@ export const HomePage = () => {
   async function refreshModules() {
     setLoading(true);
     if (!accessToken) return;
-    const data = await repoServiceRef.current.getModules(
+    const data = await moduleServiceRef.current.getModules(
       accessToken,
       user.id,
       true
@@ -90,7 +90,7 @@ export const HomePage = () => {
     setLoading(true);
     (async () => {
       try {
-        const data = await repoServiceRef.current.getModules(
+        const data = await moduleServiceRef.current.getModules(
           accessToken,
           user.id
         );

@@ -52,6 +52,7 @@ function ModulePage() {
       if (!module) return;
       const fetchedModuleData = await getModuleDetails(module);
       setModuleData(fetchedModuleData);
+      setError('');
     })();
   }, [module, getModuleDetails]);
   return (
