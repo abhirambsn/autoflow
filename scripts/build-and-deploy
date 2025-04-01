@@ -1,0 +1,107 @@
+#!/bin/bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+NODE_VERSION=23
+# This script builds the project and deploys it to the specified environment.
+# Usage: ./build-and-deploy.sh <module-name>
+# Example: ./build-and-deploy.sh my-module
+# Check if the module name is provided
+if [ -z "$1" ]; then
+  echo "Error: No module name provided."
+  echo "Usage: $0 <module-name>"
+  exit 1
+fi
+
+MODULE_NAME=$1
+MODULE_DIR="modules/$MODULE_NAME"
+
+# Check if the module directory exists
+if [ ! -d "$MODULE_DIR" ]; then
+  echo "Error: Module directory '$MODULE_DIR' does not exist."
+  exit 1
+fi
+
+# Check if nvm is installed
+if [ $? -ne 0 ]; then
+  echo "Error: nvm is not installed. Please install nvm and try again."
+  exit 1
+fi
+
+# Switch to this version of node using nvm use
+nvm use $NODE_VERSION
+
+# Check if pnpm is installed
+if ! command -v pnpm &> /dev/null; then
+  echo "Error: pnpm is not installed. Please install pnpm and try again."
+  exit 1
+fi
+# Check if docker is installed
+if ! command -v docker &> /dev/null; then
+  echo "Error: docker is not installed. Please install docker and try again."
+  exit 1
+fi
+# Check if cf is installed
+if ! command -v cf &> /dev/null; then
+  echo "Error: cf is not installed. Please install cf and try again."
+  exit 1
+fi
+
+# Docker image name is abhirambsn/autoflow-$MODULE_NAME:latest
+DOCKER_IMAGE_TAG="abhirambsn/autoflow-$MODULE_NAME:latest"
+
+# Switch to that directory
+cd $MODULE_DIR
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to change directory to '$MODULE_DIR'."
+  exit 1
+fi
+# Check if the module has a Dockerfile
+if [ ! -f "Dockerfile" ]; then
+  echo "Error: Dockerfile not found in '$MODULE_DIR'."
+  exit 1
+fi
+
+# if module is ui then run pnpm build
+if [ "$MODULE_NAME" == "ui" ]; then
+  # Check if the module has a package.json file
+  if [ ! -f "package.json" ]; then
+    echo "Error: package.json not found in '$MODULE_DIR'."
+    exit 1
+  fi
+
+  # Build the project using pnpm
+  pnpm build
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to build the project using pnpm."
+    exit 1
+  fi
+fi
+
+# Build the Docker image and push using docker buildx with platforms amd64, arm64
+docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_IMAGE_TAG --push .
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to build Docker image '$DOCKER_IMAGE_TAG'."
+  exit 1
+fi
+
+cd ../..
+
+CF_APP_NAME="autoflow-$MODULE_NAME"
+
+cf stop $CF_APP_NAME
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to stop Cloud Foundry app '$CF_APP_NAME'."
+  exit 1
+fi
+
+cf push $CF_APP_NAME \
+  --docker-image $DOCKER_IMAGE_TAG \
+
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to push Cloud Foundry app '$CF_APP_NAME'."
+  exit 1
+fi
+
+echo "Docker image '$DOCKER_IMAGE_TAG' has been pushed."
+echo "Successfully built and deployed the module '$MODULE_NAME' to Cloud Foundry."
