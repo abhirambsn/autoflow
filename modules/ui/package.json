@@ -20,6 +20,7 @@
     "@ui5/webcomponents-react": "^2.7.2",
     "@ui5/webcomponents-react-base": "^2.7.2",
     "axios": "^1.8.1",
+    "date-fns": "^4.1.0",
     "path": "^0.12.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

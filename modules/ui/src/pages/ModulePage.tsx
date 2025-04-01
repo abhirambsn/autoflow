@@ -2,20 +2,16 @@ import { CommitTable } from "@/components/ModulePage";
 import { CommitService } from "@/service/CommitService";
 import { ModuleService } from "@/service/ModuleService";
 import { useAuthState } from "@/store";
+import { capitalizeText } from "@/utils";
 import {
-  Form,
   Link,
   Breadcrumbs,
   BreadcrumbsItem,
   Button,
   FlexBox,
-  FormGroup,
-  FormItem,
-  Label,
   ObjectPage,
   ObjectPageHeader,
   ObjectPageSection,
-  ObjectPageSubSection,
   ObjectPageTitle,
   ObjectStatus,
   Text,
@@ -23,6 +19,12 @@ import {
   ToolbarButton,
   IllustratedMessage,
   Bar,
+  ObjectPageSubSection,
+  Form,
+  FormItem,
+  Label,
+  Tag,
+  Icon,
 } from "@ui5/webcomponents-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
@@ -96,15 +98,10 @@ function ModulePage() {
         <ObjectPageHeader>
           <FlexBox alignItems="Center" wrap="Wrap">
             <FlexBox direction="Column">
-              <Link>+33 6 4512 5158</Link>
               <Link href={moduleData?.repo.url}>
                 {moduleData?.repo.full_name}
               </Link>
               <Link href={moduleData?.repo.url}>{moduleData?.repo.url}</Link>
-            </FlexBox>
-            <FlexBox direction="Column" style={{ padding: "10px" }}>
-              <Label>San Jose</Label>
-              <Label>California, USA</Label>
             </FlexBox>
           </FlexBox>
         </ObjectPageHeader>
@@ -134,13 +131,6 @@ function ModulePage() {
             </Breadcrumbs>
           }
           header={moduleData?.name}
-          navigationBar={
-            <Toolbar design="Transparent">
-              <ToolbarButton design="Transparent" icon="full-screen" />
-              <ToolbarButton design="Transparent" icon="exit-full-screen" />
-              <ToolbarButton design="Transparent" icon="decline" />
-            </Toolbar>
-          }
           subHeader={moduleData?.description}
         >
           <ObjectStatus state="Positive">deployed</ObjectStatus>
@@ -148,13 +138,64 @@ function ModulePage() {
       }
       placeholder={error && <IllustratedMessage name="UnableToLoad" />}
     >
+      <ObjectPageSection
+        aria-label="General Information"
+        id="general-info"
+        titleText="General Information"
+      >
+        <ObjectPageSubSection id="repo-info" titleText="Repository Information">
+          <Form>
+            <FormItem labelContent={<Label showColon>Repository Name</Label>}>
+              <Text>{moduleData?.repo.name}</Text>
+            </FormItem>
+            <FormItem labelContent={<Label showColon>Repository URL</Label>}>
+              <Link href={moduleData?.repo?.url} target="_blank">
+                {moduleData?.repo?.url}
+              </Link>
+            </FormItem>
+            <FormItem labelContent={<Label showColon>Owner</Label>}>
+              <Text>{moduleData?.repo.author}</Text>
+            </FormItem>
+            <FormItem
+              labelContent={<Label showColon>Repository Description</Label>}
+            >
+              <Text>{moduleData?.repo?.description}</Text>
+            </FormItem>
+            <FormItem labelContent={<Label showColon>Type</Label>}>
+              <Text>{moduleData?.repo?.description}</Text>
+            </FormItem>
+            <FormItem
+              labelContent={<Label showColon>Repository Description</Label>}
+            >
+              <Tag
+                colorScheme={moduleData?.repo?.type === "private" ? "6" : "5"}
+                icon={
+                  <Icon
+                    name={
+                      moduleData?.repo?.type === "private"
+                        ? "locked"
+                        : "unlocked"
+                    }
+                  />
+                }
+                design="Set2"
+              >
+                {capitalizeText(moduleData?.repo?.type || '')}
+              </Tag>
+            </FormItem>
+          </Form>
+        </ObjectPageSubSection>
+
+        <ObjectPageSubSection id="module-info" titleText="Module Informaton">
+          <div>Module Info</div>
+        </ObjectPageSubSection>
+      </ObjectPageSection>
+
       <ObjectPageSection aria-label="Commits" id="commits" titleText="Commits">
         <FlexBox direction="Column" fitContainer>
           <Bar design="Header">
-          <div slot="startContent">
-              <Text>
-                Showing Last 10 commits
-              </Text>
+            <div slot="startContent">
+              <Text>Showing Last 10 commits</Text>
             </div>
             <div slot="endContent">
               <FlexBox gap={"0.5rem"} alignItems="Center">
@@ -169,85 +210,8 @@ function ModulePage() {
           <CommitTable loading={loading} commits={commits} />
         </FlexBox>
       </ObjectPageSection>
-      <ObjectPageSection
-        aria-label="Personal"
-        id="personal"
-        titleText="Personal"
-      >
-        <ObjectPageSubSection
-          actions={
-            <>
-              <Button design="Emphasized" style={{ minWidth: "120px" }}>
-                Custom Action
-              </Button>
-              <Button
-                design="Transparent"
-                icon="action-settings"
-                tooltip="settings"
-              />
-              <Button design="Transparent" icon="download" tooltip="download" />
-            </>
-          }
-          aria-label="Connect"
-          id="personal-connect"
-          titleText="Connect"
-        >
-          <Form
-            style={{
-              alignItems: "baseline",
-            }}
-          >
-            <FormGroup headerText="Phone Numbers">
-              <FormItem labelContent={<Label showColon>Home</Label>}>
-                <Text>+1 234-567-8901</Text>
-                <Text>+1 234-567-5555</Text>
-              </FormItem>
-            </FormGroup>
-            <FormGroup headerText="Social Accounts">
-              <FormItem labelContent={<Label showColon>LinkedIn</Label>}>
-                <Text>/DeniseSmith</Text>
-              </FormItem>
-              <FormItem labelContent={<Label showColon>Twitter</Label>}>
-                <Text>@DeniseSmith</Text>
-              </FormItem>
-            </FormGroup>
-            <FormGroup headerText="Addresses">
-              <FormItem labelContent={<Label showColon>Home Address</Label>}>
-                <Text>2096 Mission Street</Text>
-              </FormItem>
-              <FormItem labelContent={<Label showColon>Mailing Address</Label>}>
-                <Text>PO Box 32114</Text>
-              </FormItem>
-            </FormGroup>
-            <FormGroup headerText="Mailing Address">
-              <FormItem labelContent={<Label showColon>Work</Label>}>
-                <Text>DeniseSmith@sap.com</Text>
-              </FormItem>
-            </FormGroup>
-          </Form>
-        </ObjectPageSubSection>
-        <ObjectPageSubSection
-          aria-label="Payment Information"
-          id="personal-payment-information"
-          titleText="Payment Information"
-        >
-          <Form>
-            <FormGroup headerText="Salary">
-              <FormItem labelContent={<Label showColon>Bank Transfer</Label>}>
-                <Text>Money Bank, Inc.</Text>
-              </FormItem>
-            </FormGroup>
-            <FormGroup headerText="Payment method for Expenses">
-              <FormItem
-                labelContent={<Label showColon>Extra Travel Expenses</Label>}
-              >
-                <Text>Cash 100 USD</Text>
-              </FormItem>
-            </FormGroup>
-          </Form>
-        </ObjectPageSubSection>
-      </ObjectPageSection>
-      <ObjectPageSection
+
+      {/* <ObjectPageSection
         aria-label="Employment"
         id="employment"
         titleText="Employment"
@@ -335,7 +299,7 @@ function ModulePage() {
             </FormItem>
           </Form>
         </ObjectPageSubSection>
-      </ObjectPageSection>
+      </ObjectPageSection> */}
     </ObjectPage>
   );
 }
