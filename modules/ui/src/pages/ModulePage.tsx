@@ -29,6 +29,27 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
+const parseAIGeneratedFiles = (module: ModuleData) => {
+  let result = '';
+  if (!module?.hasDockerCompose) result += "Docker Compose, ";
+  if (!module?.hasKubernetes) result += "Kubernetes Manifests, ";
+  if (!module?.hasDockerfile) result += "Dockerfile, ";
+  if (!module?.hasPipeline) result += "CI/CD Pipeline File, ";
+
+  return result.slice(0, -2);
+}
+
+const parseCICDWorkflowType = (workflowType: string) => {
+  switch (workflowType) {
+    case "github":
+      return "GitHub Actions";
+    case "jenkins":
+      return "Jenkins";
+    default:
+      return "None";
+  }
+}
+
 function ModulePage() {
   const { module } = useParams();
   const access_token = useAuthState((state) => state.accessToken);
@@ -180,19 +201,42 @@ function ModulePage() {
                 }
                 design="Set2"
               >
-                {capitalizeText(moduleData?.repo?.type || '')}
+                {capitalizeText(moduleData?.repo?.type || "")}
               </Tag>
             </FormItem>
           </Form>
         </ObjectPageSubSection>
 
         <ObjectPageSubSection id="module-info" titleText="Module Informaton">
-          <div>Module Info</div>
+          <Form>
+            <FormItem labelContent={<Label showColon>Name</Label>}>
+              <Text>{moduleData?.name}</Text>
+            </FormItem>
+            <FormItem labelContent={<Label showColon>Version</Label>}>
+              <Text>{moduleData?.version}</Text>
+            </FormItem>
+            <FormItem
+              labelContent={<Label showColon>CI/CD Workflow Type</Label>}
+            >
+              <Text>{parseCICDWorkflowType(moduleData?.workflowType as string)}</Text>
+            </FormItem>
+            <FormItem
+              labelContent={<Label>AI Generated Files</Label>}
+            >
+              <Text>{moduleData && parseAIGeneratedFiles(moduleData)}</Text>
+            </FormItem>
+            <FormItem labelContent={<Label showColon>Branch</Label>}>
+              <Text>{moduleData?.branch}</Text>
+            </FormItem>
+            <FormItem labelContent={<Label showColon>Email</Label>}>
+              <Link href={`mailto:${moduleData?.email}`}>{moduleData?.email}</Link>
+            </FormItem>
+          </Form>
         </ObjectPageSubSection>
       </ObjectPageSection>
 
       <ObjectPageSection aria-label="Commits" id="commits" titleText="Commits">
-        <FlexBox direction="Column" fitContainer>
+        <FlexBox style={{marginTop: '0.5rem'}} direction="Column" fitContainer>
           <Bar design="Header">
             <div slot="startContent">
               <Text>Showing Last 10 commits</Text>
@@ -210,96 +254,6 @@ function ModulePage() {
           <CommitTable loading={loading} commits={commits} />
         </FlexBox>
       </ObjectPageSection>
-
-      {/* <ObjectPageSection
-        aria-label="Employment"
-        id="employment"
-        titleText="Employment"
-      >
-        <ObjectPageSubSection
-          aria-label="Job Information"
-          id="employment-job-information"
-          titleText="Job Information"
-        >
-          <Form>
-            <FormItem
-              labelContent={<Label showColon>Job Classification</Label>}
-            >
-              <FlexBox direction="Column">
-                <Text>Senior UI Developer</Text>
-                <Label>(UIDEV-SR)</Label>
-              </FlexBox>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Job Title</Label>}>
-              <Text>Developer</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Employee Class</Label>}>
-              <Text>Employee</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Manager</Label>}>
-              <FlexBox direction="Column">
-                <Text>Dan Smith</Text>
-                <Label>Development Manager</Label>
-              </FlexBox>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Pay Grade</Label>}>
-              <Text>Salary Grade 18 (GR-14)</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>FTE</Label>}>
-              <Text>1</Text>
-            </FormItem>
-          </Form>
-        </ObjectPageSubSection>
-        <ObjectPageSubSection
-          aria-label="Employee Details"
-          id="employment-employee-details"
-          titleText="Employee Details"
-        >
-          <Form>
-            <FormItem labelContent={<Label showColon>Start Date</Label>}>
-              <Text>Jan 01, 2018</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>End Date</Label>}>
-              <Text>Dec 31, 9999</Text>
-            </FormItem>
-            <FormItem
-              labelContent={<Label showColon>Payroll Start Date</Label>}
-            >
-              <Text>Jan 01, 2018</Text>
-            </FormItem>
-            <FormItem
-              labelContent={<Label showColon>Benefits Start Date</Label>}
-            >
-              <Text>Jul 01, 2018</Text>
-            </FormItem>
-            <FormItem
-              labelContent={<Label showColon>Company Car Eligibility</Label>}
-            >
-              <Text>Jan 01, 2021</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Equity Start Date</Label>}>
-              <Text>Jul 01, 2018</Text>
-            </FormItem>
-          </Form>
-        </ObjectPageSubSection>
-        <ObjectPageSubSection
-          aria-label="Job Relationship"
-          id="employment-job-relationship"
-          titleText="Job Relationship"
-        >
-          <Form>
-            <FormItem labelContent={<Label showColon>Manager</Label>}>
-              <Text>John Doe</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Scrum Master</Label>}>
-              <Text>Michael Adams</Text>
-            </FormItem>
-            <FormItem labelContent={<Label showColon>Product Owner</Label>}>
-              <Text>John Miller</Text>
-            </FormItem>
-          </Form>
-        </ObjectPageSubSection>
-      </ObjectPageSection> */}
     </ObjectPage>
   );
 }
