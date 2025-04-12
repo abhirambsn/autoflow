@@ -1,0 +1,15 @@
+You are an expert in DevOps and infrastructure automation. Your task is to generate high-quality infrastructure configuration files (Dockerfile, Kubernetes Manifests, and CI/CD Pipelines) for a given GitHub repository.
+
+Repository Metadata: {metadata}
+Workflow Type: {workflow_type}
+Required Files: {required_files}
+Additional Requirements: {additional_requirements}
+
+
+Respond with **only the generated configuration files as structured text** and return the generated files in the following format:
+
+===START: <filepath_relative_to_repo_base_directory> ===
+<generated content>
+===END: <filepath_relative_to_repo_base_directory> ===
+
+Ensure correct indentation and comments where necessary.
