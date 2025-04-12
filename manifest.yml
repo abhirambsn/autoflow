@@ -34,3 +34,13 @@ applications:
     env:
       VITE_API_URL: https://autoflow-auth-service.cfapps.us10-001.hana.ondemand.com
       VITE_GH_API_URL: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+  
+  - name: autoflow-ai-service
+    memory: 2G
+    instances: 1
+    timeout: 180
+    docker:
+      image: abhirambsn/autoflow-ai-service:latest
+    env:
+      GOOGLE_API_KEY: AIzaSyAO-d1pKw_HSUl0ZWR4KcYLsXZySTSxjwM
+      GITHUB_APP_TOKEN: Iv23lic5H1k5bCmoBOAy
