@@ -55,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket):
         )
 
         repo_manager.write_files(repo_path, files)
-        repo_manager.commit_and_push(repo, branch_name, required_files, app_data)
+        repo_manager.commit_and_push(repo, branch_name, app_data, required_files)
 
         pr = github_handler.create_pull_request(
             gh_repo,
