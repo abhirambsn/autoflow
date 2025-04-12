@@ -23,7 +23,10 @@ class RepositoryManager:
             with open(os.path.join(repo_path, filepath), "w") as f:
                 f.write(content)
     
-    def commit_and_push(self, repo: Any, branch_name: str, files_list_str: str = "") -> None:
+    def commit_and_push(self, repo: Any, branch_name: str, app_data: Any, files_list_str: str = "") -> None:
+        with repo.config_writer() as config:
+            config.set_value("user", "name", app_data["name"])
+            config.set_value("user", "email", app_data["bot_email"])
         repo.git.add(A=True)
         repo.git.commit(m=f"Auto-generated {files_list_str} infra setup")
         origin = repo.remote(name="origin")

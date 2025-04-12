@@ -2,6 +2,7 @@ from github import Github, GithubIntegration
 from typing import Any
 import os
 from pathlib import Path
+import requests
 
 class GithubHandler:
     github: Github
@@ -24,6 +25,26 @@ class GithubHandler:
             "default_branch": repo.default_branch,
             "repo_obj": repo
         }
+    
+    def get_app_data(self):
+        temp_token = self.integration.create_jwt()
+        headers = {
+            "Authorization": f"Bearer {temp_token}",
+            "Accept": "application/vnd.github+json"
+        }
+
+        response = requests.get("https://api.github.com/app", headers=headers)
+        response.raise_for_status()
+        app_info = response.json()
+        identity = {
+            "app_id": app_info["id"],
+            "name": app_info["name"],
+            "slug": app_info["slug"],
+            "owner": app_info["owner"]["login"],
+            "bot_email": f'{app_info["id"]}+{app_info["slug"]}[bot]@users.noreply.github.com'
+        }
+
+        return identity
     
     def clone_repo_with_github_app(self, repo_url: str):
         owner, repo = repo_url.split("/")[-2:]

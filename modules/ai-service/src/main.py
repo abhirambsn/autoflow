@@ -2,9 +2,9 @@ from fastapi import FastAPI, WebSocket
 from dotenv import load_dotenv
 import os, uuid
 from typing import List, Dict
-from util.github_handler import GithubHandler
-from util.repo_manager import RepositoryManager
-from util.infra_generator import InfraGenerator
+from .util.github_handler import GithubHandler
+from .util.repo_manager import RepositoryManager
+from .util.infra_generator import InfraGenerator
 
 load_dotenv()
 
@@ -22,6 +22,8 @@ PR_TITLE_TEMPLATE: str = "Auto generated Deployment files for {repo_name} by Aut
 repo_manager = RepositoryManager(BASE_REPO_DIR)
 github_handler = GithubHandler(GITHUB_APP_TOKEN)
 infra_generator = InfraGenerator("gemini-2.0-flash")
+
+app_data = github_handler.get_app_data()
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -53,7 +55,7 @@ async def websocket_endpoint(websocket: WebSocket):
         )
 
         repo_manager.write_files(repo_path, files)
-        repo_manager.commit_and_push(repo, branch_name, required_files)
+        repo_manager.commit_and_push(repo, branch_name, required_files, app_data)
 
         pr = github_handler.create_pull_request(
             gh_repo,
