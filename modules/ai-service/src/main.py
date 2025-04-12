@@ -39,10 +39,10 @@ async def websocket_endpoint(websocket: WebSocket):
     repo_name: str = repo_url.split("/")[-1].replace(".git", "")
 
     try:
-        authenticated_repo_url = github_handler.clone_repo_with_github_app(repo_url)
-        print(f"Authenticated repo URL: {authenticated_repo_url}")
+        print(f"Generating {required_files}... ")
         print(f"Branch name: {branch_name}")
         print(f"Repo name: {repo_name}")
+        authenticated_repo_url = github_handler.clone_repo_with_github_app(repo_url)
         repo_path, repo = repo_manager.clone_repo(authenticated_repo_url, branch_name)
         repo_metadata = github_handler.get_repo_metadata(repo_owner, repo_name)
         gh_repo = repo_metadata.pop("repo_obj")
