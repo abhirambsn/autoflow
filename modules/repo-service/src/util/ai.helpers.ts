@@ -11,7 +11,7 @@ export async function sendAIFileGenerationJobRequest(
       },
     });
 
-    return response.data;
+    return response.data?.jobId;
   } catch (err) {
     console.error("[AI SERVICE ERROR]", err);
     throw err;

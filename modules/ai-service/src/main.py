@@ -33,12 +33,7 @@ def get_redis_from_vcap() -> Redis:
     if not redis_creds:
         raise RuntimeError("Redis credentials not found in VCAP_SERVICES.")
 
-    return Redis(
-        host=redis_creds["host"],
-        port=redis_creds["port"],
-        password=redis_creds.get("password"),  # some CF Redis instances don't use passwords
-        ssl=redis_creds.get("tls_enabled", False)
-    )
+    return Redis.from_url(redis_creds["uri"])
 
 redis_conn = get_redis_from_vcap()
 queue = Queue("autoflow", connection=redis_conn)
@@ -56,11 +51,12 @@ infra_generator = InfraGenerator("gemini-2.0-flash")
 app_data = github_handler.get_app_data()
 
 class AutoflowRequest(BaseModel):
+    jobId: str
     repo_url: str
     repo_owner: str
     workflow_type: str
     required_files: str
-    additional_requirements: Optional[Dict[str, str]] = None
+    additional_requirements: str = ""
     branch: Optional[str] = "main"
 
 

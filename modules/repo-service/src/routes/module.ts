@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getOrCreateRedisClient, parseJwt, sendAIFileGenerationJobRequest } from "../util";
 import { ModuleModel } from "../entity";
 import { Octokit } from "@octokit/rest";
+import { randomUUID } from "crypto";
 
 export const moduleRouter = Router();
 
@@ -29,14 +30,16 @@ const buildRequiredFilesString = (module: any) => {
 }
 
 const publishAIFileGenerationJob = async (module: any) => {
+  const jobId = randomUUID();
   return await sendAIFileGenerationJobRequest({
+    jobId,
     repo_url: module.repo.url,
     repo_owner: module.repo.author,
     workflow_type: module.workflowType,
     required_files: buildRequiredFilesString(module),
     additional_requirements: module.otherRequirements,
     branch: module.branch,
-  })
+  });
 }
 
 moduleRouter.post("/", parseJwt, async (req, res) => {
@@ -136,4 +139,5 @@ moduleRouter.post("/:id/generate", parseJwt, async (req, res) => {
   }
   const jobId = await publishAIFileGenerationJob(module);
   res.status(200).json({ jobId, message: "File generation in progress" });
+  return;
 });
