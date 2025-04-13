@@ -29,7 +29,7 @@ app_data = github_handler.get_app_data()
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     data = await websocket.receive_json()
-    job_id: str = data.get("job_id")
+    job_id: str = data.get("jobId")
     repo_url: str = data.get("repo_url")
     repo_owner: str = data.get("repo_owner")
     workflow_type: str = data.get("workflow_type")

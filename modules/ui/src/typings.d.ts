@@ -87,3 +87,8 @@ declare interface CommitRecord {
   createdAt?: string;
   updatedAt?: string;
 }
+
+declare interface Message {
+  type: "success" | "error" | "warning";
+  message: string;
+}

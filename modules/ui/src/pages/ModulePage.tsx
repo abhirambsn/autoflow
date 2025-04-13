@@ -60,6 +60,7 @@ function ModulePage() {
   const [commits, setCommits] = useState<CommitRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [message, setMessage] = useState<Message>({} as Message);
 
   const getModuleDetails = useCallback(
     async (module: string) => {
@@ -97,6 +98,20 @@ function ModulePage() {
     );
     setCommits(data);
     setLoading(false);
+  }
+
+  async function triggerGenerateFiles() {
+    if (!access_token) return;
+    setLoading(true);
+    try {
+      const data = await moduleServiceRef.current.generateFilesTrigger(access_token, module as string);
+      setMessage({ type: "success", message: data });
+    } catch (err) {
+      setMessage({ type: "error", message: "Unable to trigger file generation" });
+      console.error("[MODULE SVC ERROR]", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -143,6 +158,7 @@ function ModulePage() {
           actionsBar={
             <Toolbar design="Transparent">
               <ToolbarButton design="Emphasized" text="Trigger Deployment" />
+              <ToolbarButton onClick={triggerGenerateFiles} design="Transparent" text="Regenerate Required Files"/>
             </Toolbar>
           }
           breadcrumbs={

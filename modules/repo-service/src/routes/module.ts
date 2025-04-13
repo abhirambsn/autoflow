@@ -66,7 +66,7 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
       }
     });
     await newModule.save();
-    const jobId = publishAIFileGenerationJob(newModule);
+    const jobId = await publishAIFileGenerationJob(newModule);
     res.status(201).json({jobId, ...newModule.toObject()});
     return;
   } catch (err) {
@@ -137,6 +137,6 @@ moduleRouter.post("/:id/generate", parseJwt, async (req, res) => {
     res.status(404).json({ message: "Module not found" });
     return;
   }
-  const jobId = publishAIFileGenerationJob(module);
+  const jobId = await publishAIFileGenerationJob(module);
   res.status(200).json({ jobId, message: "File generation in progress" });
 });

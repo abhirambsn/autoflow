@@ -50,4 +50,21 @@ export class ModuleService {
           throw err;
         }
       }
+
+
+      async generateFilesTrigger(access_token: string, moduleId: string) {
+        const url = `${this.url}/api/v1/modules/${moduleId}/generate`;
+        try {
+          const res = await axios.post(url, {}, {
+            headers: {
+              Authorization: `Bearer ${access_token}`,
+            },
+          });
+          return res.data;
+        }
+        catch (err) {
+          console.error("[REPO SVC ERROR]", err);
+          throw err;
+        }
+      }
 }

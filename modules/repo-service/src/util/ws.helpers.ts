@@ -18,6 +18,7 @@ export class WebSocketClient {
     }
 
     connect(): void {
+        console.log("Connecting to WebSocket server at:", this.serverUrl);
         try {
             this.ws = new WebSocket(this.serverUrl);
 
@@ -29,7 +30,6 @@ export class WebSocketClient {
             this.ws.onmessage = async (e: MessageEvent) => {
                 try {
                     const message = JSON.parse(e.data.toString()) as JobMessage;
-                    console.log("WebSocket message received:", message);
 
                     const notificationId = await createNotification(message.jobId, JSON.stringify(message), "NEW");
                     console.log("Notification created with ID:", notificationId);
@@ -39,7 +39,7 @@ export class WebSocketClient {
             };
 
             this.ws.onerror = (e: Event) => {
-                console.error("WebSocket error:", e);
+                console.error("WebSocket error:", e);   
             }
 
             this.ws.onclose = (e: CloseEvent) => {
@@ -67,14 +67,58 @@ export class WebSocketClient {
         }, this.reconnectInterval);
     }
 
+    private getReadyStateString(): string {
+        if (!this.ws) return 'No WebSocket instance';
+        
+        switch (this.ws.readyState) {
+          case WebSocket.CONNECTING: return 'CONNECTING (0)';
+          case WebSocket.OPEN: return 'OPEN (1)';
+          case WebSocket.CLOSING: return 'CLOSING (2)';
+          case WebSocket.CLOSED: return 'CLOSED (3)';
+          default: return `Unknown (${this.ws.readyState})`;
+        }
+    }
 
-    sendJobMessage(payload?:any): void {
+    private async waitForConnection(): Promise<void> {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+          return Promise.resolve();
+        }
+        
+        return new Promise((resolve, reject) => {
+          const maxWaitTime = 10000; // 10 seconds timeout
+          const checkInterval = 100; // Check every 100ms
+          let elapsedTime = 0;
+          
+          // Store current ws reference to detect if it changes
+          const initialWs = this.ws;
+          
+          const intervalId = setInterval(() => {
+            // If ws instance changed or we've waited too long, reject
+            if (initialWs !== this.ws || elapsedTime >= maxWaitTime) {
+              clearInterval(intervalId);
+              reject(new Error('Connection timeout or websocket instance changed'));
+              return;
+            }
+            console.log("Checking WebSocket connection status...", this.getReadyStateString());
+            
+            elapsedTime += checkInterval;
+            
+            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+              clearInterval(intervalId);
+              resolve();
+            }
+          }, checkInterval);
+        });
+      }
+
+
+    async sendJobMessage(payload?:any): Promise<void> {
+        await this.waitForConnection();
         const jobId = randomUUID();
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
             throw new Error("WebSocket is not connected");
         }
 
         this.ws.send(JSON.stringify({jobId, ...payload}));
-        console.log("WebSocket message sent:", payload);
     }
 }
