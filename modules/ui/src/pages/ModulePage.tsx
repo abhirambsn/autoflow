@@ -109,7 +109,8 @@ function ModulePage() {
         access_token,
         module as string
       );
-      setMessage({ type: "success", message: data });
+      const parsedMessage = `${data?.message}: Job ID: ${data?.jobId}`;
+      setMessage({ type: "success", message: parsedMessage });
     } catch (err) {
       setMessage({
         type: "error",
@@ -119,6 +120,10 @@ function ModulePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function onMessageClose() {
+    setMessage({} as Message);
   }
 
   useEffect(() => {
@@ -184,6 +189,7 @@ function ModulePage() {
             Object.keys(message).length > 0 ? (
               <MessageStrip
                 design={message?.type === "success" ? "Positive" : "Negative"}
+                onClose={onMessageClose}
               >
                 {message.message}
               </MessageStrip>
@@ -195,6 +201,7 @@ function ModulePage() {
             Object.keys(message).length > 0 ? (
               <MessageStrip
                 design={message?.type === "success" ? "Positive" : "Negative"}
+                onClose={onMessageClose}
               >
                 {message.message}
               </MessageStrip>

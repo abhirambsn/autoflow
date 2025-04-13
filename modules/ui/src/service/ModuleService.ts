@@ -55,7 +55,7 @@ export class ModuleService {
       async generateFilesTrigger(access_token: string, moduleId: string) {
         const url = `${this.url}/api/v1/modules/${moduleId}/generate`;
         try {
-          const res = await axios.post(url, {}, {
+          const res = await axios.post(url, null, {
             headers: {
               Authorization: `Bearer ${access_token}`,
             },
