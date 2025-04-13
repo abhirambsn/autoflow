@@ -1,11 +1,46 @@
 import { Router } from "express";
-import { getOrCreateRedisClient, parseJwt } from "../util";
+import { getOrCreateRedisClient, parseJwt, WebSocketClient } from "../util";
 import { ModuleModel } from "../entity";
 import { Octokit } from "@octokit/rest";
 
 export const moduleRouter = Router();
 
 let redisClient: any;
+
+const websocketClient = new WebSocketClient(`${process.env.AI_SERVICE_URL}/ws`);
+
+const buildRequiredFilesString = (module: any) => {
+  const requiredFiles = [];
+  if (module.hasDockerfile) {
+    requiredFiles.push("Dockerfile");
+  }
+  if (module.hasKubernetes) {
+    requiredFiles.push("Kubernetes Manifests");
+  }
+  if (module.hasDockerCompose) {
+    requiredFiles.push("Docker Compose file");
+  }
+  if (module.hasPipeline) {
+    if (module.workflowType === "github") {
+      requiredFiles.push("Github Actions Workflow file")
+    } else if (module.workflowType === "jenkins") {
+      requiredFiles.push("Jenkinsfile");
+    }
+  }
+  return requiredFiles.join(",");
+}
+
+const publishAIFileGenerationJob = (module: any) => {
+  websocketClient.connect();
+  return websocketClient.sendJobMessage({
+    repo_url: module.repo.url,
+    repo_owner: module.repo.author,
+    workflow_type: module.workflowType,
+    required_files: buildRequiredFilesString(module),
+    additional_requirements: module.otherRequirements,
+    branch: module.branch,
+  })
+}
 
 moduleRouter.post("/", parseJwt, async (req, res) => {
   try {
@@ -31,7 +66,8 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
       }
     });
     await newModule.save();
-    res.status(201).json(newModule);
+    const jobId = publishAIFileGenerationJob(newModule);
+    res.status(201).json({jobId, ...newModule.toObject()});
     return;
   } catch (err) {
     console.error("[REPO ERROR]", err);

@@ -7,13 +7,14 @@ class RepositoryManager:
     def __init__(self, base_dir: str) -> None:
         self.base_dir = base_dir
 
-    def clone_repo(self, repo_url: str, branch_name: str) -> Tuple[str, Any]:
+    def clone_repo(self, repo_url: str, branch_name: str, repo_branch: str = "main") -> Tuple[str, Any]:
         repo_name = repo_url.split("/")[-1].replace(".git", "")
         repo_path = os.path.join(self.base_dir, repo_name)
         if os.path.exists(repo_path):
             shutil.rmtree(repo_path)
         env = os.environ.copy()
-        repo = Repo.clone_from(repo_url, repo_path, env=env)
+        repo = Repo.clone_from(repo_url, repo_path, branch=repo_branch, env=env)
+        repo.git.checkout(repo_branch)
         repo.git.checkout("-b", branch_name)
         return repo_path, repo
     

@@ -16,6 +16,7 @@ applications:
     env:
       NODE_ENV: production
       JWT_SECRET: Gh-jwt-alfaromeo-aramco-f1-team
+      AI_SERVICE_URL: wss://autoflow-ai-service.cfapps.us10-001.hana.ondemand.com
   
 
   - name: autoflow-webhook-service
