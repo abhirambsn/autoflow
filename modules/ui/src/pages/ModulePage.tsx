@@ -25,19 +25,20 @@ import {
   Label,
   Tag,
   Icon,
+  MessageStrip,
 } from "@ui5/webcomponents-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
 const parseAIGeneratedFiles = (module: ModuleData) => {
-  let result = '';
+  let result = "";
   if (!module?.hasDockerCompose) result += "Docker Compose, ";
   if (!module?.hasKubernetes) result += "Kubernetes Manifests, ";
   if (!module?.hasDockerfile) result += "Dockerfile, ";
   if (!module?.hasPipeline) result += "CI/CD Pipeline File, ";
 
   return result.slice(0, -2);
-}
+};
 
 const parseCICDWorkflowType = (workflowType: string) => {
   switch (workflowType) {
@@ -48,7 +49,7 @@ const parseCICDWorkflowType = (workflowType: string) => {
     default:
       return "None";
   }
-}
+};
 
 function ModulePage() {
   const { module } = useParams();
@@ -104,10 +105,16 @@ function ModulePage() {
     if (!access_token) return;
     setLoading(true);
     try {
-      const data = await moduleServiceRef.current.generateFilesTrigger(access_token, module as string);
+      const data = await moduleServiceRef.current.generateFilesTrigger(
+        access_token,
+        module as string
+      );
       setMessage({ type: "success", message: data });
     } catch (err) {
-      setMessage({ type: "error", message: "Unable to trigger file generation" });
+      setMessage({
+        type: "error",
+        message: "Unable to trigger file generation",
+      });
       console.error("[MODULE SVC ERROR]", err);
     } finally {
       setLoading(false);
@@ -158,7 +165,11 @@ function ModulePage() {
           actionsBar={
             <Toolbar design="Transparent">
               <ToolbarButton design="Emphasized" text="Trigger Deployment" />
-              <ToolbarButton onClick={triggerGenerateFiles} design="Transparent" text="Regenerate Required Files"/>
+              <ToolbarButton
+                onClick={triggerGenerateFiles}
+                design="Transparent"
+                text="Regenerate Required Files"
+              />
             </Toolbar>
           }
           breadcrumbs={
@@ -169,6 +180,26 @@ function ModulePage() {
           }
           header={moduleData?.name}
           subHeader={moduleData?.description}
+          expandedContent={
+            Object.keys(message).length > 0 ? (
+              <MessageStrip
+                design={message?.type === "success" ? "Positive" : "Negative"}
+              >
+                {message.message}
+              </MessageStrip>
+            ) : (
+              <></>
+            )
+          }
+          snappedContent={
+            Object.keys(message).length > 0 ? (
+              <MessageStrip
+                design={message?.type === "success" ? "Positive" : "Negative"}
+              >
+                {message.message}
+              </MessageStrip>
+            ) : (<></>)
+          }
         >
           <ObjectStatus state="Positive">deployed</ObjectStatus>
         </ObjectPageTitle>
@@ -234,25 +265,31 @@ function ModulePage() {
             <FormItem
               labelContent={<Label showColon>CI/CD Workflow Type</Label>}
             >
-              <Text>{parseCICDWorkflowType(moduleData?.workflowType as string)}</Text>
+              <Text>
+                {parseCICDWorkflowType(moduleData?.workflowType as string)}
+              </Text>
             </FormItem>
-            <FormItem
-              labelContent={<Label>AI Generated Files</Label>}
-            >
+            <FormItem labelContent={<Label>AI Generated Files</Label>}>
               <Text>{moduleData && parseAIGeneratedFiles(moduleData)}</Text>
             </FormItem>
             <FormItem labelContent={<Label showColon>Branch</Label>}>
               <Text>{moduleData?.branch}</Text>
             </FormItem>
             <FormItem labelContent={<Label showColon>Email</Label>}>
-              <Link href={`mailto:${moduleData?.email}`}>{moduleData?.email}</Link>
+              <Link href={`mailto:${moduleData?.email}`}>
+                {moduleData?.email}
+              </Link>
             </FormItem>
           </Form>
         </ObjectPageSubSection>
       </ObjectPageSection>
 
       <ObjectPageSection aria-label="Commits" id="commits" titleText="Commits">
-        <FlexBox style={{marginTop: '0.5rem'}} direction="Column" fitContainer>
+        <FlexBox
+          style={{ marginTop: "0.5rem" }}
+          direction="Column"
+          fitContainer
+        >
           <Bar design="Header">
             <div slot="startContent">
               <Text>Showing Last 10 commits</Text>

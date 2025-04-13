@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export class ModuleService {
-    private url: string = import.meta.env.VITE_GH_API_URL as string;
+    private url: string = import.meta.env.VITE_API_URL as string;
 
     async createModule(access_token: string, data: ModuleData) {
         const url = `${this.url}/api/v1/modules/`;

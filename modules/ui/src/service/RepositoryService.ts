@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export class RepositoryService {
-  private url: string = import.meta.env.VITE_GH_API_URL as string;
+  private url: string = import.meta.env.VITE_API_URL as string;
 
   async getRepositories(access_token: string, refresh?: boolean) {
     try {

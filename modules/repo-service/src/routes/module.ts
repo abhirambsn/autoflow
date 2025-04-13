@@ -1,13 +1,11 @@
 import { Router } from "express";
-import { getOrCreateRedisClient, parseJwt, WebSocketClient } from "../util";
+import { getOrCreateRedisClient, parseJwt, sendAIFileGenerationJobRequest } from "../util";
 import { ModuleModel } from "../entity";
 import { Octokit } from "@octokit/rest";
 
 export const moduleRouter = Router();
 
 let redisClient: any;
-
-const websocketClient = new WebSocketClient(`${process.env.AI_SERVICE_URL}/ws`);
 
 const buildRequiredFilesString = (module: any) => {
   const requiredFiles = [];
@@ -30,9 +28,8 @@ const buildRequiredFilesString = (module: any) => {
   return requiredFiles.join(",");
 }
 
-const publishAIFileGenerationJob = (module: any) => {
-  websocketClient.connect();
-  return websocketClient.sendJobMessage({
+const publishAIFileGenerationJob = async (module: any) => {
+  return await sendAIFileGenerationJobRequest({
     repo_url: module.repo.url,
     repo_owner: module.repo.author,
     workflow_type: module.workflowType,
