@@ -125,3 +125,18 @@ moduleRouter.get("/:ownerId/all", parseJwt, async (req, res) => {
     return;
   }
 });
+
+moduleRouter.post("/:id/generate", parseJwt, async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ message: "Module ID is required" });
+    return;
+  }
+  const module = await ModuleModel.findOne({ id });
+  if (!module) {
+    res.status(404).json({ message: "Module not found" });
+    return;
+  }
+  const jobId = publishAIFileGenerationJob(module);
+  res.status(200).json({ jobId, message: "File generation in progress" });
+});
