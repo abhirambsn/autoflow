@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getOrCreateRedisClient, parseJwt, sendAIFileGenerationJobRequest } from "../util";
+import { createNotification, getOrCreateRedisClient, parseJwt, sendAIFileGenerationJobRequest } from "../util";
 import { ModuleModel } from "../entity";
 import { Octokit } from "@octokit/rest";
 import { randomUUID } from "crypto";
@@ -43,6 +43,7 @@ const publishAIFileGenerationJob = async (module: any) => {
 }
 
 moduleRouter.post("/", parseJwt, async (req, res) => {
+  let owner = '';
   try {
     const moduleCheck = await ModuleModel.findOne({
       "repo.id": req.body.repo.id,
@@ -65,12 +66,27 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
         secret: process.env.WEBHOOK_SECRET,
       }
     });
+    owner = req.body.repo.author;
     await newModule.save();
     const jobId = await publishAIFileGenerationJob(newModule);
+    await createNotification(
+      '',
+      `Module ${newModule.name} onboarded successfully`,
+      "SUCCESS",
+      newModule.ownerId,
+      "Module Onboarding Success",
+    )
     res.status(201).json({jobId, ...newModule.toObject()});
     return;
   } catch (err) {
     console.error("[REPO ERROR]", err);
+    await createNotification(
+      "",
+      `Module onboarding failed`,
+      "SUCCESS",
+      owner,
+      "Module Onboarding Success",
+    )
     res.status(500).json({ message: "Internal Server Error", error: err });
     return;
   }

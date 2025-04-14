@@ -14,6 +14,14 @@ declare interface AuthState {
   refreshSession: () => Promise<void>;
 }
 
+declare interface NotificationState {
+  notifications: NotificationMessage[];
+  addNotification: (notification: NotificationMessage) => void;
+  removeNotification: (id: string) => void;
+  clearNotifications: () => void;
+  setNotifications: (notifications: NotificationMessage[]) => void;
+}
+
 declare interface Repo {
   id: string;
   name: string;
@@ -91,4 +99,15 @@ declare interface CommitRecord {
 declare interface Message {
   type: "success" | "error" | "warning";
   message: string;
+}
+
+declare interface NotificationMessage {
+  _id: string;
+  jobId: string;
+  title: string;
+  message: string;
+  status: string;
+  owner: string;
+  type: "ERROR" | "WARN" | "SUCCESS" | "INFO";
+  timestamp: string;
 }

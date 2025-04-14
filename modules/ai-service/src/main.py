@@ -6,6 +6,7 @@ from typing import Dict, Optional
 from .util.github_handler import GithubHandler
 from .util.repo_manager import RepositoryManager
 from .util.infra_generator import InfraGenerator
+from .util.helpers import publish_notification
 from redis import Redis
 from rq import Queue
 
@@ -109,8 +110,24 @@ def process_autflow_job(
         )
         print(f"[{job_id}] Success: PR created at {pr.html_url}")
         push_result(job_id, "success", f"Files generated, PR is available at: {pr.html_url}")
+
+        # Notify the user about the PR creation
+        publish_notification(
+            message=f"Files generated, PR is available at: {pr.html_url}",
+            type="SUCCESS",
+            jobId=job_id,
+            owner=repo_owner,
+            title="Autoflow Files Generated and PR Created"
+        )
     except Exception as e:
         print(f"[{job_id}] Error: {str(e)}")
+        publish_notification(
+            message=f"Error occurred: {str(e)}",
+            type="ERROR",
+            jobId=job_id,
+            owner=repo_owner,
+            title="Autoflow Job Failed"
+        )
         traceback.print_exc()
     finally:
         print(f"[{job_id}] Cleaning up repo at {repo_path}")
@@ -139,6 +156,14 @@ async def autoflow_endpoint(request: AutoflowRequest):
         required_files,
         additional_requirements,
         job_id=job_id
+    )
+
+    publish_notification(
+        message="File Generation Job has been queued for processing.",
+        type="INFO",
+        jobId=job_id,
+        owner=repo_owner,
+        title="Autoflow Job Queued"
     )
 
     return {

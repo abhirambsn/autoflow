@@ -34,12 +34,6 @@ function Sidebar({ slot }: SidebarProps) {
             text="Toggle Theme"
             onClick={toggleTheme}
           />
-          <SideNavigationItem
-            icon="log"
-            design="Action"
-            unselectable
-            text="Logout"
-          />
         </>
       }
       onSelectionChange={(e) =>

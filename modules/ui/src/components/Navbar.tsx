@@ -1,14 +1,22 @@
 import { useAuthState, useNavState } from "@/store";
+import { useNotificationState } from "@/store/notificationState";
 import { ShellBarProfileClickEventDetail } from "@ui5/webcomponents-fiori/dist/ShellBar.js";
 import {
   Avatar,
+  Bar,
   Button,
   FlexBox,
+  FlexBoxAlignItems,
+  FlexBoxJustifyContent,
   List,
   ListDomRef,
   ListItemStandard,
+  MessageItem,
+  MessageView,
+  MessageViewDomRef,
   Popover,
   PopoverDomRef,
+  ResponsivePopover,
   ShellBar,
   ShellBarDomRef,
   Text,
@@ -16,6 +24,8 @@ import {
   Ui5CustomEvent,
 } from "@ui5/webcomponents-react";
 import { ListItemClickEventDetail } from "@ui5/webcomponents/dist/List.js";
+import ButtonDesign from "@ui5/webcomponents/dist/types/ButtonDesign.js";
+import TitleLevel from "@ui5/webcomponents/dist/types/TitleLevel.js";
 import { useRef, useState } from "react";
 
 type Props = {
@@ -33,6 +43,14 @@ function Navbar({ toggleSidebar, slot }: Props) {
   const userPopoverRef = useRef<PopoverDomRef>(null);
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
 
+  const notifications = useNotificationState((state) => state.notifications);
+  const notificationPopoverRef = useRef<PopoverDomRef>(null);
+  const notificationMessageViewPopoverRef = useRef<MessageViewDomRef>(null);
+  const [notificationsPopoverOpen, setNotificationsPopoverOpen] =
+    useState(false);
+  const [isOnNotificationDetailsPage, setIsOnNotificationDetailsPage] =
+    useState(false);
+
   const openUserPopover = (
     e: Ui5CustomEvent<ShellBarDomRef, ShellBarProfileClickEventDetail>
   ) => {
@@ -40,9 +58,18 @@ function Navbar({ toggleSidebar, slot }: Props) {
     setUserPopoverOpen((prev) => !prev);
   };
 
+  const openNotificationPopover = (
+    e: Ui5CustomEvent<ShellBarDomRef, ShellBarProfileClickEventDetail>
+  ) => {
+    notificationPopoverRef.current!.opener = e.detail.targetRef;
+    setNotificationsPopoverOpen((prev) => !prev);
+  }
+
   const logout = () => {
     setAuthState({ isAuthenticated: false, user: {} as User });
-    window.location.assign(`${import.meta.env.VITE_API_URL}/api/v1/auth/logout`);
+    window.location.assign(
+      `${import.meta.env.VITE_API_URL}/api/v1/auth/logout`
+    );
   };
 
   function handleItemClick(
@@ -62,13 +89,27 @@ function Navbar({ toggleSidebar, slot }: Props) {
     }
   }
 
+  function getNotificationType(notification: NotificationMessage) {
+    switch(notification.type) {
+      case "SUCCESS":
+        return "Positive";
+      case "ERROR":
+        return "Critical";
+      case "WARN":
+        return "Negative";
+      case "INFO":
+        return "Information";
+    }
+  }
+
   return (
     <>
       <ShellBar
         primaryTitle={primaryTitle}
         slot={slot}
         showNotifications
-        notificationsCount="4"
+        notificationsCount={notifications.length.toString()}
+        onNotificationsClick={openNotificationPopover}
         showSearchField
         secondaryTitle={secondaryTitle}
         profile={
@@ -116,6 +157,79 @@ function Navbar({ toggleSidebar, slot }: Props) {
           </List>
         </FlexBox>
       </Popover>
+      <ResponsivePopover
+        ref={notificationPopoverRef}
+        open={notificationsPopoverOpen}
+        headerText="Notifications"
+        className="contentPartNoPadding headerPartNoPadding"
+        onClose={() => {
+          notificationMessageViewPopoverRef.current?.navigateBack();
+          setNotificationsPopoverOpen(false);
+        }}
+        header={
+          <Bar
+            startContent={
+              <FlexBox alignItems={FlexBoxAlignItems.Center}>
+                {isOnNotificationDetailsPage && (
+                  <Button
+                    design={ButtonDesign.Transparent}
+                    icon="slim-arrow-left"
+                    onClick={() => {
+                      setIsOnNotificationDetailsPage(false);
+                      notificationMessageViewPopoverRef.current?.navigateBack();
+                    }}
+                    style={{ marginInline: "0 0.5rem" }}
+                  />
+                )}
+
+                <Title level={TitleLevel.H4}>Notifications</Title>
+              </FlexBox>
+            }
+          />
+        }
+        footer={
+          <FlexBox
+            alignItems={FlexBoxAlignItems.Center}
+            justifyContent={FlexBoxJustifyContent.End}
+            style={{
+              paddingBlock: "0.25rem",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
+            <Button
+              design={ButtonDesign.Transparent}
+              onClick={() => {
+                setNotificationsPopoverOpen(false);
+              }}
+            >
+              Close
+            </Button>
+          </FlexBox>
+        }
+      >
+        <MessageView
+          style={{
+            maxWidth: "400px",
+            height: "350px",
+            width: "400px",
+          }}
+          ref={notificationMessageViewPopoverRef}
+          showDetailsPageHeader={false}
+          onItemSelect={() => {
+            console.log("Item selected");
+            setIsOnNotificationDetailsPage(true);
+          }}
+        >
+          {notifications.map((notification) => (
+            <MessageItem
+              key={notification._id}
+              titleText={notification.title}
+              type={getNotificationType(notification)}
+            >{notification.message}</MessageItem>
+          ))}
+        </MessageView>
+      </ResponsivePopover>
     </>
   );
 }

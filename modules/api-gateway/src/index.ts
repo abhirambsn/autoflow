@@ -74,7 +74,9 @@ routes.forEach((route) => {
             headers["Authorization"] = req.headers["authorization"];
         }
     
-        req.url = `${route.path}${req.url}`;
+        req.url = path.posix.join(route.path, req.url);
+
+        console.log(`Proxying request to ${route.target}${req.url}`);
     
         proxy.web(req, res, {
             target: route.target,
@@ -90,7 +92,7 @@ routes.forEach((route) => {
 });
 
 app.get("/health", (req, res) => {
-  res.json({ message: "ok" });
+  res.json({ status: "UP", timestamp: new Date().toISOString() });
   return;
 });
 

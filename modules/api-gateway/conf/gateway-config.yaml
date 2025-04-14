@@ -12,8 +12,12 @@ routes:
   
   - path: /api/v1/modules
     target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
-    serviceName: autoflow-repo-service
+    serviceName: autoflow-module-service
 
   - path: /api/v1/commits
     target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
-    serviceName: autoflow-repo-service    
+    serviceName: autoflow-commit-service    
+
+  - path: /api/v1/notifications
+    target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+    serviceName: autoflow-notification-service

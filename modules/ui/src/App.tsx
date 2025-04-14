@@ -1,4 +1,4 @@
-import './App.css'
+import "./App.css";
 import { NavigationLayout } from "@ui5/webcomponents-react";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
@@ -7,14 +7,15 @@ import { useAuthState, useNavState } from "./store";
 import { ThemeContextProvider } from "./context/ThemeContext";
 import { useCallback, useEffect } from "react";
 import axios from "axios";
+import { useNotificationState } from "./store/notificationState";
 
 function App() {
   const navState = useNavState();
   const authState = useAuthState();
+  const addNotification = useNotificationState((state) => state.addNotification);
   const setAuthState = useAuthState((state) => state.setAuthState);
   const refreshSession = useAuthState((state) => state.refreshSession);
   const navigate = useNavigate();
-  // const [onboardingWizardOpen, setOnboardingWizardOpen] = useState(false);
 
   const toggleSidebar = () => {
     navState.setNavState({
@@ -65,6 +66,25 @@ function App() {
       setAuthState({ refreshToken });
     }
   }, [setAuthState]);
+
+  useEffect(() => {
+    console.log("Registering for notifications...");
+    const eventSource = new EventSource(
+      `${import.meta.env.VITE_API_URL}/api/v1/notifications/${
+        authState.user.username
+      }`
+    );
+
+    eventSource.onmessage = (event) => {
+      const data: NotificationMessage = JSON.parse(event.data);
+      addNotification(data);
+    };
+
+    return () => {
+      console.log("Closing event source...");
+      eventSource.close();
+    }
+  }, [authState.user.username, addNotification]);
 
   return (
     <ThemeContextProvider>

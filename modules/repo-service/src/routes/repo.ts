@@ -1,7 +1,6 @@
-import { NextFunction, Request, Response, Router } from "express";
+import { Router } from "express";
 import { Octokit } from "@octokit/rest";
 import { getOrCreateRedisClient, parseJwt, parseRepoData } from "../util";
-import { ModuleModel } from "../entity";
 
 let redisClient: any;
 
