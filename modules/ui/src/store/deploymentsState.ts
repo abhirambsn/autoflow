@@ -1,5 +1,4 @@
 import { DeploymentService } from "@/service/DeploymentService";
-import axios from "axios";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
