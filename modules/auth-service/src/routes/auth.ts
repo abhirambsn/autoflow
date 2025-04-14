@@ -93,7 +93,6 @@ authRouter.get("/", async (req, res) => {
     profileUrl: data?.profileUrl,
     permissions: grantedScopes,
   };
-  console.log(profile);
   res.json(profile);
   return;
 });

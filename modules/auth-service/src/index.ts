@@ -11,7 +11,6 @@ import passport from "passport";
 const app = express();
 
 const UI_URL = process.env.NODE_ENV === "production" ? "https://autoflow-ui.cfapps.us10-001.hana.ondemand.com" : "http://localhost:5173";
-console.log("UI_URL", UI_URL);
 
 const allowedOrigins = [
   UI_URL,

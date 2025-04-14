@@ -11,7 +11,6 @@ import {
   TableRow,
   TableSelectionDomRef,
   TableVirtualizer,
-  Tag,
   Text,
   Ui5CustomEvent,
 } from "@ui5/webcomponents-react";
@@ -30,7 +29,6 @@ const TableHeader = ({ slot }: { slot?: string }) => {
     <TableHeaderRow slot={slot} sticky>
       <TableHeaderCell>ID</TableHeaderCell>
       <TableHeaderCell>Repository</TableHeaderCell>
-      <TableHeaderCell>Latest Deployment Status</TableHeaderCell>
       <TableHeaderCell>Time</TableHeaderCell>
       <TableHeaderCell></TableHeaderCell>
     </TableHeaderRow>
@@ -57,18 +55,13 @@ export const CommitTable = ({ commits, loading }: Props) => {
         nodata={<IllustratedMessage name="NoData" />}
       >
         <TableVirtualizer slot="features" rowCount={10} />
-        {commits.map((commit) => (
-          <TableRow key={commit.commitId} rowKey={commit.commitId}>
+        {commits.map((commit, index) => (
+          <TableRow key={index} rowKey={commit._id}>
             <TableCell>
               <Text>{commit.commitId}</Text>
             </TableCell>
             <TableCell>
               <Text>{commit.module.name}</Text>
-            </TableCell>
-            <TableCell>
-              <Tag colorScheme={"6"} design="Set2">
-                SUCCESS
-              </Tag>
             </TableCell>
             <TableCell>
               <Text>{format(commit.commitTime, "MMMM do, yyyy H:mma")}</Text>

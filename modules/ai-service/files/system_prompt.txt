@@ -31,6 +31,7 @@ Instructions:
     ii) Include steps for building, testing, and deploying the application.
     iii) Ensure it integrates with Kubernetes, Docker, or other specified deployment targets.
     iv) Use environment variables and secrets properly.
+    v) For Github actions, always enable the workflow_dispatch trigger
 
 4. Final Check:
     i) Validate generated files for syntax correctness.

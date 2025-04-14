@@ -81,7 +81,6 @@ function OnboardRepositoryPage() {
         selectedRepo.author
       );
       setSelectedRepoBranches(branches);
-      console.log(user.id);
     })();
   }, [selectedRepo, access_token, user]);
 
@@ -129,7 +128,6 @@ function OnboardRepositoryPage() {
   }
   function populateFormAndNextStep() {
     if (!selectedRepo) return;
-    console.log("[SELECTED REPO]", selectedRepo);
     editFormValue("repo", selectedRepo);
     editFormValue("name", selectedRepo.name);
     editFormValue("description", selectedRepo.description);
@@ -167,7 +165,6 @@ function OnboardRepositoryPage() {
     }
     setErrorMessages([]);
     try {
-      console.log("[MODULE DATA]", moduleOnboardingData);
       const resp = await moduleServiceRef.current.createModule(
         access_token,
         moduleOnboardingData

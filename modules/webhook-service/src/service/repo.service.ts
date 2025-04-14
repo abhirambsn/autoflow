@@ -29,7 +29,6 @@ export class RepoService {
             repoId: repository?.id,
         }
 
-        console.log('Request body:', reqBody);
         try {
             const response = await axios.post(`${this.baseUrl}/api/v1/commits`, reqBody, {
                 headers: {

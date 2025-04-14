@@ -80,6 +80,7 @@ declare interface ModuleData {
 }
 
 declare interface CommitRecord {
+  _id: string;
   commitId: string;
   message: string;
   author: string;
@@ -110,4 +111,31 @@ declare interface NotificationMessage {
   owner: string;
   type: "ERROR" | "WARN" | "SUCCESS" | "INFO";
   timestamp: string;
+}
+
+type DeploymentType = "github" | "jenkins" | "none";
+
+declare interface DeploymentStatus {
+  status: string;
+  conclusion?: string;
+  url?: string;
+  workflow_title?: string;
+  html_url?: string;
+  started_at?: string;
+  updated_at?: string;
+  workflow_id?: number;
+  id?: number;
+  loading: boolean;
+}
+
+declare interface DeploymentState {
+  status: DeploymentStatus | null;
+  runId: string | null;
+  type: DeploymentType | null;
+  startDeployment: (
+    access_token: string,
+    type: DeploymentType,
+    config: any,
+  ) => Promise<void>;
+  pollStatus: (access_token: string, config: any) => Promise<void>;
 }

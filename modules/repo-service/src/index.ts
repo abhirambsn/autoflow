@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import { commitRouter, moduleRouter, notificationsRouter, repoRouter } from "./routes";
+import { commitRouter, deploymentRouter, moduleRouter, notificationsRouter, repoRouter } from "./routes";
 import mongoose from "mongoose";
 import cors from "cors";
 
@@ -23,6 +23,7 @@ app.use("/api/v1/repositories", repoRouter);
 app.use('/api/v1/modules', moduleRouter);
 app.use('/api/v1/commits', commitRouter);
 app.use('/api/v1/notifications', notificationsRouter);
+app.use('/api/v1/deployments', deploymentRouter);
 
 const PORT = process.env.PORT || 3001;
 

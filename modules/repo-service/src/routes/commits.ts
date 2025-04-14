@@ -37,7 +37,7 @@ commitRouter.get("/:repoId", async (req, res) => {
     const refresh = req.query.refresh;
     let commitData;
     if (!cacheData || refresh) {
-      commitData = await CommitsModel.find({ repoId });
+      commitData = await CommitsModel.find({ repoId }).sort({ commitTime: -1 }).limit(10);
       const module = await ModuleModel.findOne({
         "repo.id": repoId,
       });
