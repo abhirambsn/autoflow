@@ -82,10 +82,10 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
     console.error("[REPO ERROR]", err);
     await createNotification(
       "",
-      `Module onboarding failed`,
-      "SUCCESS",
+      `Module onboarding failed: ${err}`,
+      "ERROR",
       owner,
-      "Module Onboarding Success",
+      "Module Onboarding Failed",
     )
     res.status(500).json({ message: "Internal Server Error", error: err });
     return;
