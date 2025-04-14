@@ -45,10 +45,6 @@ commitRouter.get("/:repoId", async (req, res) => {
         res.status(404).json({ message: "Module not found" });
         return;
       }
-      if (commitData.length === 0) {
-        res.status(404).json({ message: "No commits found" });
-        return;
-      }
       const combinedData = commitData.map((commit) => {
         const doc = commit.toObject();
         return {

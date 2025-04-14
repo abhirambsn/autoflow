@@ -44,6 +44,12 @@ function Navbar({ toggleSidebar, slot }: Props) {
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
 
   const notifications = useNotificationState((state) => state.notifications);
+  const clearNotifications = useNotificationState(
+    (state) => state.clearNotifications
+  );
+  const removeNotification = useNotificationState(
+    (state) => state.removeNotification
+  );
   const notificationPopoverRef = useRef<PopoverDomRef>(null);
   const notificationMessageViewPopoverRef = useRef<MessageViewDomRef>(null);
   const [notificationsPopoverOpen, setNotificationsPopoverOpen] =
@@ -63,7 +69,7 @@ function Navbar({ toggleSidebar, slot }: Props) {
   ) => {
     notificationPopoverRef.current!.opener = e.detail.targetRef;
     setNotificationsPopoverOpen((prev) => !prev);
-  }
+  };
 
   const logout = () => {
     setAuthState({ isAuthenticated: false, user: {} as User });
@@ -90,7 +96,7 @@ function Navbar({ toggleSidebar, slot }: Props) {
   }
 
   function getNotificationType(notification: NotificationMessage) {
-    switch(notification.type) {
+    switch (notification.type) {
       case "SUCCESS":
         return "Positive";
       case "ERROR":
@@ -185,6 +191,18 @@ function Navbar({ toggleSidebar, slot }: Props) {
                 <Title level={TitleLevel.H4}>Notifications</Title>
               </FlexBox>
             }
+            endContent={
+              !isOnNotificationDetailsPage && (
+                <Button
+                  design={ButtonDesign.Transparent}
+                  icon="decline"
+                  onClick={clearNotifications}
+                  disabled={notifications.length === 0}
+                >
+                  Clear All
+                </Button>
+              )
+            }
           />
         }
         footer={
@@ -226,7 +244,21 @@ function Navbar({ toggleSidebar, slot }: Props) {
               key={notification._id}
               titleText={notification.title}
               type={getNotificationType(notification)}
-            >{notification.message}</MessageItem>
+            >
+              <p>{notification.message}</p>
+
+              <Button
+                design={ButtonDesign.Transparent}
+                slot="actions"
+                onClick={() => {
+                  removeNotification(notification._id);
+                  notificationMessageViewPopoverRef.current?.navigateBack();
+                  setIsOnNotificationDetailsPage(false);
+                }}
+              >
+                Mark as read
+              </Button>
+            </MessageItem>
           ))}
         </MessageView>
       </ResponsivePopover>

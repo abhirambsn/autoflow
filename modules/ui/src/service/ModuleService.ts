@@ -9,6 +9,7 @@ export class ModuleService {
           const res = await axios.post(url, data, {
             headers: {
               Authorization: `Bearer ${access_token}`,
+              "Content-Type": "application/json",
             },
           });
           return res.data;

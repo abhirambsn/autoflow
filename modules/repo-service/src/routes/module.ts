@@ -69,8 +69,9 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
     owner = req.body.repo.author;
     await newModule.save();
     const jobId = await publishAIFileGenerationJob(newModule);
+
     await createNotification(
-      '',
+      jobId,
       `Module ${newModule.name} onboarded successfully`,
       "SUCCESS",
       newModule.ownerId,
@@ -80,8 +81,9 @@ moduleRouter.post("/", parseJwt, async (req, res) => {
     return;
   } catch (err) {
     console.error("[REPO ERROR]", err);
+    const tempJobId = randomUUID();
     await createNotification(
-      "",
+      tempJobId,
       `Module onboarding failed: ${err}`,
       "ERROR",
       owner,

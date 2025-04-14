@@ -15,6 +15,7 @@ import {
   Wizard,
   WizardStep,
   MessageStrip,
+  Link,
 } from "@ui5/webcomponents-react";
 import { AxiosError } from "axios";
 import { useEffect, useRef, useState } from "react";
@@ -35,6 +36,7 @@ function OnboardRepositoryPage() {
     "2": false,
     "3": true,
     "4": true,
+    "5": true,
   });
 
   const repos = useRepoState((state) => state.repos);
@@ -111,7 +113,7 @@ function OnboardRepositoryPage() {
 
   function saveFormAndReview() {
     validateForm();
-    nextStep("3", "4");
+    nextStep("4", "5");
   }
 
   function handleRelatedBooleanChange(
@@ -143,6 +145,13 @@ function OnboardRepositoryPage() {
 
   function validateEmail(email: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function buildGithubIntegration() {
+    const state = JSON.stringify({
+      repoId: selectedRepo?.id,
+    });
+    return `https://github.com/apps/autoflow-integration/installations/new?state=${state}`;
   }
 
   async function startOnboarding() {
@@ -282,7 +291,7 @@ function OnboardRepositoryPage() {
             style={{ marginTop: "1rem" }}
             design="Emphasized"
             disabled={!validateForm()}
-            onClick={() => saveFormAndReview()}
+            onClick={() => nextStep("3", "4")}
           >
             Next
           </Button>
@@ -291,6 +300,53 @@ function OnboardRepositoryPage() {
       <WizardStep
         disabled={disabled["4"]}
         selected={selected === "4"}
+        icon="add-equipment"
+        titleText="Install Github App"
+      >
+        <Title style={{ marginBottom: "0.1rem" }}>
+          Install Github App on {moduleOnboardingData?.repo?.name}
+        </Title>
+
+        <Text style={{ marginTop: "1rem" }}>
+          To onboard the selected repository, you need to install the Autoflow
+          Github App on your repository. Click the link below to install the
+          app, after that go to the next step.
+
+          <br/>
+          <strong>NOTE:</strong> if you have already installed the app in your account once, please select the repository or you can click <strong>All repositories</strong>
+        </Text>
+        <br />
+        <Link target="_blank" rel="noopener noreferrer" href={buildGithubIntegration()}>Install Github Integration</Link>
+
+        <FlexBox direction="Row" justifyContent="SpaceBetween">
+          <Button
+            style={{ marginTop: "1rem" }}
+            design="Default"
+            onClick={() => {
+              nextStep("4", "3");
+              setErrorMessages([]);
+            }}
+            disabled={submitting}
+          >
+            Previous
+          </Button>
+          <Button
+            style={{ marginTop: "1rem" }}
+            design="Emphasized"
+            disabled={
+              errorMessages.length > 0 ||
+              submitting ||
+              (!validateForm() && !selectedRepo)
+            }
+            onClick={() => saveFormAndReview()}
+          >
+            Next
+          </Button>
+        </FlexBox>
+      </WizardStep>
+      <WizardStep
+        disabled={disabled["5"]}
+        selected={selected === "5"}
         icon="accept"
         titleText="Review and Done"
         style={{ gap: "1rem" }}
@@ -325,7 +381,7 @@ function OnboardRepositoryPage() {
             style={{ marginTop: "1rem" }}
             design="Default"
             onClick={() => {
-              nextStep("4", "3");
+              nextStep("5", "4");
               setErrorMessages([]);
             }}
             disabled={submitting}

@@ -50,8 +50,6 @@ app.use(
 );
 
 app.use(globalLogger);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 const config = loadConfig();
 if (!config) {
@@ -74,7 +72,7 @@ routes.forEach((route) => {
             headers["Authorization"] = req.headers["authorization"];
         }
     
-        req.url = path.posix.join(route.path, req.url);
+        req.url = path.posix.join(route.path, req.url || '/');
 
         console.log(`Proxying request to ${route.target}${req.url}`);
     
@@ -90,6 +88,9 @@ routes.forEach((route) => {
     
     app.use(route.path, handler);
 });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/health", (req, res) => {
   res.json({ status: "UP", timestamp: new Date().toISOString() });
