@@ -10,16 +10,16 @@ let redisClient: any;
 
 const buildRequiredFilesString = (module: any) => {
   const requiredFiles = [];
-  if (module.hasDockerfile) {
+  if (!module.hasDockerfile) {
     requiredFiles.push("Dockerfile");
   }
-  if (module.hasKubernetes) {
+  if (!module.hasKubernetes) {
     requiredFiles.push("Kubernetes Manifests");
   }
-  if (module.hasDockerCompose) {
+  if (!module.hasDockerCompose) {
     requiredFiles.push("Docker Compose file");
   }
-  if (module.hasPipeline) {
+  if (!module.hasPipeline) {
     if (module.workflowType === "github") {
       requiredFiles.push("Github Actions Workflow file")
     } else if (module.workflowType === "jenkins") {
