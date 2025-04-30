@@ -110,6 +110,7 @@ export const HomePage = () => {
 
   return (
     <section>
+      <title>Autoflow | Home</title>
       <Title style={{ marginBottom: "1rem" }} level="H1">
         Home Page
       </Title>

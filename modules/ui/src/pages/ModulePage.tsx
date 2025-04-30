@@ -198,7 +198,7 @@ function ModulePage() {
   }, [module, getModuleDetails, getCommitDetails]);
   return (
     <>
-      <title>Autoflow | {moduleData?.name}</title>
+      <title>{`Autoflow | ${moduleData?.name}`}</title>
       <ObjectPage
         headerArea={
           <ObjectPageHeader>

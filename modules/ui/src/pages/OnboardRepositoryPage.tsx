@@ -183,6 +183,8 @@ function OnboardRepositoryPage() {
   }
 
   return (
+    <>
+    <title>Autoflow | Onboard Repository</title>
     <Wizard
       contentLayout="SingleStep"
       style={{ height: "100dvh", overflow: "hidden" }}
@@ -400,6 +402,7 @@ function OnboardRepositoryPage() {
         </FlexBox>
       </WizardStep>
     </Wizard>
+    </>
   );
 }
 

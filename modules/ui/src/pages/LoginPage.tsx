@@ -16,6 +16,7 @@ const LoginPage = () => {
 
   return (
     <Page noScrolling backgroundDesign="List" style={{ height: "100dvh", margin: 0, padding: 0 }}>
+      <title>Autoflow | Login</title>
       <FlexBox alignItems="Center" style={{ height: "100%" }}>
         <img
           style={{ margin: 0, padding: 0 }}

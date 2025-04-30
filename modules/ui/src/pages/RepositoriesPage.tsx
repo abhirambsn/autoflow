@@ -82,6 +82,7 @@ export const RepositoriesPage = () => {
 
   return (
     <section>
+      <title>Autoflow | Repositories</title>
       <Title style={{ marginBottom: "1rem" }} level="H1">
         My Repositories
       </Title>
