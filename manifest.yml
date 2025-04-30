@@ -1,14 +1,14 @@
 applications:
-  - name: autoflow-auth-service
+  - name: af-auth-service
     memory: 256M
     instances: 1
     docker:
       image: abhirambsn/autoflow-auth-service:latest
     env:
       NODE_ENV: production
-      SELF_URL: https://autoflow-api-gateway.cfapps.us10-001.hana.ondemand.com
+      SELF_URL: https://af-api-gateway.cfapps.us10-001.hana.ondemand.com
 
-  - name: autoflow-repo-service
+  - name: af-repo-service
     memory: 512M
     instances: 1
     docker:
@@ -16,10 +16,10 @@ applications:
     env:
       NODE_ENV: production
       JWT_SECRET: Gh-jwt-alfaromeo-aramco-f1-team
-      AI_SERVICE_URL: https://autoflow-ai-service.cfapps.us10-001.hana.ondemand.com
+      AI_SERVICE_URL: https://af-ai-service.cfapps.us10-001.hana.ondemand.com
   
 
-  - name: autoflow-webhook-service
+  - name: af-webhook-service
     memory: 256M
     instances: 1
     docker:
@@ -27,15 +27,15 @@ applications:
     env:
       NODE_ENV: production
     
-  - name: autoflow-ui
+  - name: autoflow
     memory: 512M
     instances: 1
     docker:
       image: abhirambsn/autoflow-ui:latest
     env:
-      VITE_API_URL: https://autoflow-api-gateway.cfapps.us10-001.hana.ondemand.com
+      VITE_API_URL: https://af-api-gateway.cfapps.us10-001.hana.ondemand.com
   
-  - name: autoflow-ai-service
+  - name: af-ai-service
     memory: 1G
     instances: 1
     timeout: 180
@@ -45,7 +45,7 @@ applications:
       GOOGLE_API_KEY: AIzaSyAO-d1pKw_HSUl0ZWR4KcYLsXZySTSxjwM
       GITHUB_APP_TOKEN: Iv23lic5H1k5bCmoBOAy
   
-  - name: autoflow-api-gateway
+  - name: af-api-gateway
     memory: 256M
     instances: 1
     docker:

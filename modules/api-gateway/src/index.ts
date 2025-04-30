@@ -35,7 +35,7 @@ const PORT = process.env.PORT || 6001;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://autoflow-ui.cfapps.us10-001.hana.ondemand.com",
+  "https://autoflow.cfapps.us10-001.hana.ondemand.com",
 ];
 
 app.use(

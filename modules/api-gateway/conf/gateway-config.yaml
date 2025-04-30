@@ -3,25 +3,25 @@ version: 1.0.0
 
 routes:
   - path: /api/v1/auth
-    target: https://autoflow-auth-service.cfapps.us10-001.hana.ondemand.com
+    target: https://af-auth-service.cfapps.us10-001.hana.ondemand.com
     serviceName: autoflow-auth-service
 
   - path: /api/v1/repositories
-    target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+    target: https://af-repo-service.cfapps.us10-001.hana.ondemand.com
     serviceName: autoflow-repo-service
   
   - path: /api/v1/modules
-    target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+    target: https://af-repo-service.cfapps.us10-001.hana.ondemand.com
     serviceName: autoflow-module-service
 
   - path: /api/v1/commits
-    target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+    target: https://af-repo-service.cfapps.us10-001.hana.ondemand.com
     serviceName: autoflow-commit-service    
   
   - path: /api/v1/deployments
-    target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+    target: https://af-repo-service.cfapps.us10-001.hana.ondemand.com
     serviceName: autoflow-deployment-service   
 
   - path: /api/v1/notifications
-    target: https://autoflow-repo-service.cfapps.us10-001.hana.ondemand.com
+    target: https://af-repo-service.cfapps.us10-001.hana.ondemand.com
     serviceName: autoflow-notification-service

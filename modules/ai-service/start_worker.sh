@@ -1,2 +1,2 @@
 #!/bin/bash
-RQ_REDIS_URL=rediss://:YzXnQvYJGHAYZxvsqSwhdQArDvQtDpOo@master.rg-2bbb92aa-1ef2-4fd5-bafc-6b9f1f055b93.9u04ff.use1.cache.amazonaws.com:1610 rq worker autoflow
+RQ_REDIS_URL=rediss://:RizgURvHEKbgeFlenDxYSyZFmSzCJLJy@master.rg-e44b920a-4858-43df-848c-89288b5f0df9.9u04ff.use1.cache.amazonaws.com:1600 rq worker autoflow

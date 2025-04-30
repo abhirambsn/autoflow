@@ -40,8 +40,11 @@ export class DeploymentService {
     return res.data;
   }
 
-  async getGithubDeploymentOptions(access_token: string, repo_id: string) {
-    const url = `${this.url}/api/v1/deployments/${repo_id}`;
+  async getGithubDeploymentOptions(access_token: string, repo_id: string, refresh: boolean) {
+    let url = `${this.url}/api/v1/deployments/${repo_id}`;
+    if (refresh) {
+      url += "?refresh=true";
+    }
     const res = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${access_token}`,

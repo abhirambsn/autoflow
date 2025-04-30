@@ -102,10 +102,11 @@ function ModulePage() {
     [access_token]
   );
 
-  async function getDeployments() {
+  async function getDeployments(refresh: boolean = false) {
     const data = await deploymentServiceRef.current.getGithubDeploymentOptions(
       access_token,
-      moduleData?.repo.full_name as string
+      moduleData?.repo.full_name as string,
+      refresh
     );
     setDeploymentWorkflows(data);
   }
@@ -197,6 +198,7 @@ function ModulePage() {
   }, [module, getModuleDetails, getCommitDetails]);
   return (
     <>
+      <title>Autoflow | {moduleData?.name}</title>
       <ObjectPage
         headerArea={
           <ObjectPageHeader>
@@ -484,7 +486,7 @@ function ModulePage() {
         }
         headerText="Choose Deployment Workflow"
         open={deploymentSelectModalOpen}
-        onOpen={getDeployments}
+        onOpen={() => getDeployments()}
       >
         <Select
           style={{ width: "100%" }}
@@ -500,6 +502,13 @@ function ModulePage() {
               <Option value={workflow?.id}>{workflow?.name}</Option>
             ))}
         </Select>
+        <Link
+          design="Default"
+          onClick={() => getDeployments(true)}
+          wrappingType="None"
+        >
+          Refresh Workflow List
+        </Link>
       </Dialog>
     </>
   );

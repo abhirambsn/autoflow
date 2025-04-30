@@ -87,7 +87,11 @@ fi
 
 cd ../..
 
-CF_APP_NAME="autoflow-$MODULE_NAME"
+CF_APP_NAME="af-$MODULE_NAME"
+
+if [ "$MODULE_NAME" == "ui" ]; then
+  CF_APP_NAME="autoflow"
+fi
 
 cf stop $CF_APP_NAME
 if [ $? -ne 0 ]; then

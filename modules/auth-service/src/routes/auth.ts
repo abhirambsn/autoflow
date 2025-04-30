@@ -98,8 +98,9 @@ authRouter.get("/", async (req, res) => {
 });
 
 authRouter.get("/logout", (req, res) => {
+  const uiUrl = process.env.UI_URL || "http://localhost:5173";
   req.logout(() => {
-    res.redirect("http://localhost:5173/login");
+    res.redirect(`${uiUrl}/login`);
   });
 });
 
